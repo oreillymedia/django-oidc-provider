@@ -1,6 +1,6 @@
 from django.core.management import call_command
 from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from oidc_provider.lib.utils.token import (
     create_id_token,
@@ -30,13 +30,14 @@ class EndSessionTestCase(TestCase):
 
         self.url = reverse('oidc_provider:end-session')
 
+    @override_settings(OIDC_LOGOUT_URL='/post-logout/')
     def test_redirects(self):
         query_params = {
             'post_logout_redirect_uri': self.LOGOUT_URL,
         }
         response = self.client.get(self.url, query_params)
         # With no id_token the OP MUST NOT redirect to the requested redirect_uri.
-        self.assertRedirects(response, settings.get('OIDC_LOGIN_URL'), fetch_redirect_response=False)
+        self.assertRedirects(response, '/post-logout/', fetch_redirect_response=False)
 
         id_token_dic = create_id_token(user=self.user, aud=self.oidc_client.client_id)
         id_token = encode_id_token(id_token_dic, self.oidc_client)

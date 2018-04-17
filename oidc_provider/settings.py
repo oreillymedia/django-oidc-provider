@@ -19,6 +19,15 @@ class DefaultSettings(object):
         return settings.LOGIN_URL
 
     @property
+    def OIDC_LOGOUT_URL(self):
+        """
+        OPTIONAL. Used after logging out the user.By default Django's
+        LOGOUT_REDIRECT_URL will be used and finally fallback to Django's
+        LOGIN_URL.
+        """
+        return settings.LOGOUT_REDIRECT_URL or settings.LOGIN_URL
+
+    @property
     def SITE_URL(self):
         """
         OPTIONAL. The OP server url.
