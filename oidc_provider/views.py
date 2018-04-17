@@ -308,7 +308,7 @@ class EndSessionView(View):
         state = request.GET.get('state', '')
         client = None
 
-        next_page = settings.get('OIDC_LOGIN_URL')
+        next_page = settings.get('OIDC_LOGOUT_URL')
         after_end_session_hook = settings.get('OIDC_AFTER_END_SESSION_HOOK', import_str=True)
 
         if id_token_hint:
