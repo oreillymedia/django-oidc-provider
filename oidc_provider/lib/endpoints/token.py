@@ -166,7 +166,11 @@ class TokenEndpoint(object):
             self.client,
             self.params['scope'].split(' '))
 
-        id_token_dic = create_id_token(
+        create_id_token_hook = settings.import_hook(
+            'OIDC_IDTOKEN_CREATE_HOOK'
+        )
+
+        id_token_dic = create_id_token_hook(
             user=self.user,
             aud=self.client.client_id,
             nonce='self.code.nonce',
@@ -194,8 +198,12 @@ class TokenEndpoint(object):
             client=self.code.client,
             scope=self.code.scope)
 
+        create_id_token_hook = settings.import_hook(
+            'OIDC_IDTOKEN_CREATE_HOOK'
+        )
+
         if self.code.is_authentication:
-            id_token_dic = create_id_token(
+            id_token_dic = create_id_token_hook(
                 user=self.code.user,
                 aud=self.client.client_id,
                 nonce=self.code.nonce,
@@ -238,8 +246,11 @@ class TokenEndpoint(object):
             scope=scope)
 
         # If the Token has an id_token it's an Authentication request.
+        create_id_token_hook = settings.import_hook(
+            'OIDC_IDTOKEN_CREATE_HOOK'
+        )
         if self.token.id_token:
-            id_token_dic = create_id_token(
+            id_token_dic = create_id_token_hook(
                 user=self.token.user,
                 aud=self.client.client_id,
                 nonce=None,

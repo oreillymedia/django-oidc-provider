@@ -132,6 +132,14 @@ class DefaultSettings(object):
         return 'oidc_provider.lib.utils.common.default_idtoken_processing_hook'
 
     @property
+    def OIDC_IDTOKEN_CREATE_HOOK(self):
+        """
+        OPTIONAL. A string with the location of your hook.
+        Used to create a dictionary that will be the payload of the id_token.
+        """
+        return 'oidc_provider.lib.utils.token.create_id_token'
+
+    @property
     def OIDC_GRANT_TYPE_PASSWORD_ENABLE(self):
         """
         OPTIONAL. A boolean to set whether to allow the Resource Owner Password
@@ -169,6 +177,11 @@ def import_from_str(value):
     except ImportError as e:
         msg = 'Could not import %s for settings. %s: %s.' % (value, e.__class__.__name__, e)
         raise ImportError(msg)
+
+
+def import_hook(hook_name):
+    hook_path = get(hook_name.upper())
+    return import_from_str(hook_path)
 
 
 def get(name, import_str=False):
