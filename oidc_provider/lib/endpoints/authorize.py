@@ -21,7 +21,6 @@ from oidc_provider.lib.errors import (
 )
 from oidc_provider.lib.utils.token import (
     create_code,
-    create_id_token,
     create_token,
     encode_id_token,
 )
@@ -162,7 +161,11 @@ class AuthorizeEndpoint(object):
                     # Include at_hash when access_token is being returned.
                     if 'access_token' in query_fragment:
                         kwargs['at_hash'] = token.at_hash
-                    id_token_dic = create_id_token(**kwargs)
+
+                    create_id_token_hook = settings.import_hook(
+                        'OIDC_IDTOKEN_CREATE_HOOK'
+                    )
+                    id_token_dic = create_id_token_hook(**kwargs)
 
                     # Check if response_type must include id_token in the response.
                     if self.params['response_type'] in ['id_token', 'id_token token', 'code id_token', 'code id_token token']:
