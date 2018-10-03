@@ -140,6 +140,14 @@ class DefaultSettings(object):
         return 'oidc_provider.lib.utils.token.create_id_token'
 
     @property
+    def OIDC_IDTOKEN_ENCODE_HOOK(self):
+        """
+        OPTIONAL. A string with the location of your hook.
+        Used to encode a dictionary that will be the payload of the id_token.
+        """
+        return 'oidc_provider.lib.utils.token.encode_id_token'
+
+    @property
     def OIDC_GRANT_TYPE_PASSWORD_ENABLE(self):
         """
         OPTIONAL. A boolean to set whether to allow the Resource Owner Password

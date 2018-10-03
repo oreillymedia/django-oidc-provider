@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ### [Unreleased]
 
+### [0.6.0-orm] - 2018-10-03
+
+##### Changed
+- Added `OIDC_IDTOKEN_ENCODE_HOOK` setting to allow for setting function that's used when encoding an id_token.
 
 ### [0.5.5] - 2018-09-11
 

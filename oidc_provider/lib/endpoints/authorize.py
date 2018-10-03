@@ -22,7 +22,6 @@ from oidc_provider.lib.errors import (
 from oidc_provider.lib.utils.token import (
     create_code,
     create_token,
-    encode_id_token,
 )
 from oidc_provider.models import (
     Client,
@@ -166,6 +165,10 @@ class AuthorizeEndpoint(object):
                         'OIDC_IDTOKEN_CREATE_HOOK'
                     )
                     id_token_dic = create_id_token_hook(**kwargs)
+
+                    encode_id_token = settings.import_hook(
+                        'OIDC_IDTOKEN_ENCODE_HOOK'
+                    )
 
                     # Check if response_type must include id_token in the response.
                     if self.params['response_type'] in ['id_token', 'id_token token', 'code id_token', 'code id_token token']:

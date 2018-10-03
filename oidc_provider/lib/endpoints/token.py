@@ -18,7 +18,6 @@ from oidc_provider.lib.errors import (
 from oidc_provider.lib.utils.token import (
     create_id_token,
     create_token,
-    encode_id_token,
 )
 from oidc_provider.models import (
     Client,
@@ -36,6 +35,9 @@ class TokenEndpoint(object):
         self.params = {}
         self.user = None
         self._extract_params()
+
+    def _encode_id_token(self, *args):
+        return settings.import_hook('OIDC_IDTOKEN_ENCODE_HOOK')(*args)
 
     def _extract_params(self):
         client_id, client_secret = self._extract_client_auth()
@@ -187,7 +189,7 @@ class TokenEndpoint(object):
             'refresh_token': token.refresh_token,
             'expires_in': settings.get('OIDC_TOKEN_EXPIRE'),
             'token_type': 'bearer',
-            'id_token': encode_id_token(id_token_dic, token.client),
+            'id_token': self._encode_id_token(id_token_dic, token.client),
         }
 
     def create_code_response_dic(self):
@@ -226,7 +228,7 @@ class TokenEndpoint(object):
             'refresh_token': token.refresh_token,
             'token_type': 'bearer',
             'expires_in': settings.get('OIDC_TOKEN_EXPIRE'),
-            'id_token': encode_id_token(id_token_dic, token.client),
+            'id_token': self._encode_id_token(id_token_dic, token.client),
         }
 
         return dic
@@ -273,7 +275,7 @@ class TokenEndpoint(object):
             'refresh_token': token.refresh_token,
             'token_type': 'bearer',
             'expires_in': settings.get('OIDC_TOKEN_EXPIRE'),
-            'id_token': encode_id_token(id_token_dic, self.token.client),
+            'id_token': self._encode_id_token(id_token_dic, self.token.client),
         }
 
         return dic
