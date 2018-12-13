@@ -3,7 +3,7 @@ try:
     from django.urls import reverse
 except ImportError:
     from django.core.urlresolvers import reverse
-from django.test import TestCase
+from django.test import TestCase, override_settings
 
 from oidc_provider.lib.utils.token import (
     create_token,
@@ -34,6 +34,7 @@ class EndSessionTestCase(TestCase):
 
         self.url = reverse('oidc_provider:end-session')
 
+    @override_settings(OIDC_LOGOUT_URL='/post-logout/')
     def test_redirects_when_aud_is_str(self):
         query_params = {
             'post_logout_redirect_uri': self.LOGOUT_URL,
@@ -42,7 +43,7 @@ class EndSessionTestCase(TestCase):
         # With no id_token the OP MUST NOT redirect to the requested
         # redirect_uri.
         self.assertRedirects(
-            response, settings.get('OIDC_LOGIN_URL'),
+            response, '/post-logout/',
             fetch_redirect_response=False)
 
         token = create_token(self.user, self.oidc_client, [])
