@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models, migrations
 from django.conf import settings
+from oidc_provider import settings as oidc_settings
 
 
 class Migration(migrations.Migration):
@@ -10,6 +11,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('auth', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        migrations.swappable_dependency(oidc_settings.get('OIDC_CLIENT_MODEL')),
     ]
 
     operations = [
@@ -20,10 +22,14 @@ class Migration(migrations.Migration):
                 ('name', models.CharField(default=b'', max_length=100)),
                 ('client_id', models.CharField(unique=True, max_length=255)),
                 ('client_secret', models.CharField(unique=True, max_length=255)),
-                ('response_type', models.CharField(max_length=30, choices=[(b'code', b'code (Authorization Code Flow)'), (b'id_token', b'id_token (Implicit Flow)'), (b'id_token token', b'id_token token (Implicit Flow)')])),
+                ('response_type', models.CharField(max_length=30, choices=[
+                    (b'code', b'code (Authorization Code Flow)'), (b'id_token', b'id_token (Implicit Flow)'),
+                    (b'id_token token', b'id_token token (Implicit Flow)')])),
                 ('_redirect_uris', models.TextField(default=b'')),
             ],
             options={
+                'abstract': False,
+                'swappable': 'OIDC_CLIENT_MODEL'
             },
             bases=(models.Model,),
         ),
@@ -34,7 +40,7 @@ class Migration(migrations.Migration):
                 ('expires_at', models.DateTimeField()),
                 ('_scope', models.TextField(default=b'')),
                 ('code', models.CharField(unique=True, max_length=255)),
-                ('client', models.ForeignKey(to='oidc_provider.Client', on_delete=models.CASCADE)),
+                ('client', models.ForeignKey(oidc_settings.get('OIDC_CLIENT_MODEL'), on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -49,7 +55,7 @@ class Migration(migrations.Migration):
                 ('_scope', models.TextField(default=b'')),
                 ('access_token', models.CharField(unique=True, max_length=255)),
                 ('_id_token', models.TextField()),
-                ('client', models.ForeignKey(to='oidc_provider.Client', on_delete=models.CASCADE)),
+                ('client', models.ForeignKey(oidc_settings.get('OIDC_CLIENT_MODEL'), on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
