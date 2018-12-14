@@ -82,6 +82,13 @@ class DefaultSettings(object):
         return 'oidc_provider.lib.utils.common.default_sub_generator'
 
     @property
+    def OIDC_IDTOKEN_INCLUDE_CLAIMS(self):
+        """
+        OPTIONAL. If enabled, id_token will include standard claims of the user.
+        """
+        return False
+
+    @property
     def OIDC_SESSION_MANAGEMENT_ENABLE(self):
         """
         OPTIONAL. If enabled, the Server will support Session Management 1.0 specification.
@@ -147,6 +154,21 @@ class DefaultSettings(object):
         """
         return 'oidc_provider.lib.utils.token.encode_id_token'
 
+    def OIDC_INTROSPECTION_PROCESSING_HOOK(self):
+        """
+        OPTIONAL. A string with the location of your function.
+        Used to update the response for a valid introspection token request.
+        """
+        return 'oidc_provider.lib.utils.common.default_introspection_processing_hook'
+
+    @property
+    def OIDC_INTROSPECTION_VALIDATE_AUDIENCE_SCOPE(self):
+        """
+        OPTIONAL: A boolean to specify whether or not to verify that the introspection
+        resource has the requesting client id as one of its scopes.
+        """
+        return True
+
     @property
     def OIDC_GRANT_TYPE_PASSWORD_ENABLE(self):
         """
@@ -169,6 +191,7 @@ class DefaultSettings(object):
             'authorize': 'oidc_provider/authorize.html',
             'error': 'oidc_provider/error.html'
         }
+
 
 default_settings = DefaultSettings()
 
@@ -209,7 +232,8 @@ def get(name, import_str=False):
         default_value.update(value)
         value = default_value
     else:
-        value = value or default_value
+        if value is None:
+            value = default_value
         value = import_from_str(value) if import_str else value
 
     return value
