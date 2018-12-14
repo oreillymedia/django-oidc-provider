@@ -154,6 +154,7 @@ class DefaultSettings(object):
         """
         return 'oidc_provider.lib.utils.token.encode_id_token'
 
+    @property
     def OIDC_INTROSPECTION_PROCESSING_HOOK(self):
         """
         OPTIONAL. A string with the location of your function.

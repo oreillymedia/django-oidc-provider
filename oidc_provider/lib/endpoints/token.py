@@ -11,10 +11,7 @@ from oidc_provider.lib.errors import (
     UserAuthError,
 )
 from oidc_provider.lib.utils.oauth2 import extract_client_auth
-from oidc_provider.lib.utils.token import (
-    create_id_token,
-    create_token,
-)
+from oidc_provider.lib.utils.token import create_token
 from oidc_provider.models import (
     Client,
     Code,
@@ -160,6 +157,7 @@ class TokenEndpoint(object):
         )
 
         id_token_dic = create_id_token_hook(
+            token=token,
             user=self.user,
             aud=self.client.client_id,
             nonce='self.code.nonce',
@@ -268,35 +266,6 @@ class TokenEndpoint(object):
         }
 
         return dic
-
-    def create_access_token_response_dic(self):
-        # See https://tools.ietf.org/html/rfc6749#section-4.3
-
-        token = create_token(
-            self.user,
-            self.client,
-            self.params['scope'].split(' '))
-
-        id_token_dic = create_id_token(
-            token=token,
-            user=self.user,
-            aud=self.client.client_id,
-            nonce='self.code.nonce',
-            at_hash=token.at_hash,
-            request=self.request,
-            scope=token.scope,
-        )
-
-        token.id_token = id_token_dic
-        token.save()
-
-        return {
-            'access_token': token.access_token,
-            'refresh_token': token.refresh_token,
-            'expires_in': settings.get('OIDC_TOKEN_EXPIRE'),
-            'token_type': 'bearer',
-            'id_token': encode_id_token(id_token_dic, token.client),
-        }
 
     def create_client_credentials_response_dic(self):
         # See https://tools.ietf.org/html/rfc6749#section-4.4.3
