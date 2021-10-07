@@ -2,5 +2,6 @@
 from django.dispatch import Signal
 
 
-user_accept_consent = Signal(providing_args=['user', 'client', 'scope'])
-user_decline_consent = Signal(providing_args=['user', 'client', 'scope'])
+#  Provided Arguments ['user', 'client', 'scope']
+user_accept_consent = Signal()
+user_decline_consent = Signal()
