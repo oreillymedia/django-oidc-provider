@@ -3,8 +3,9 @@
 from __future__ import unicode_literals
 
 import datetime
+from datetime import timezone
+
 from django.db import migrations, models
-from django.utils.timezone import utc
 
 
 class Migration(migrations.Migration):
@@ -30,7 +31,7 @@ class Migration(migrations.Migration):
             model_name='client',
             name='date_created',
             field=models.DateField(
-                auto_now_add=True, default=datetime.datetime(2016, 1, 11, 18, 44, 32, 192477, tzinfo=utc)),
+                auto_now_add=True, default=datetime.datetime(2016, 1, 11, 18, 44, 32, 192477, tzinfo=timezone.utc)),
             preserve_default=False,
         ),
         migrations.AlterField(
