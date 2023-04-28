@@ -9,7 +9,7 @@ try:
     from urlparse import urlsplit, parse_qs, urlunsplit
 except ImportError:
     from urllib.parse import urlsplit, parse_qs, urlunsplit, urlencode
-from uuid import uuid4
+from secrets import token_hex 
 
 from django.utils import timezone
 
@@ -206,7 +206,7 @@ class AuthorizeEndpoint(object):
                     redirect_uri_parsed.scheme, redirect_uri_parsed.netloc)
 
                 # Create random salt.
-                salt = md5(uuid4().hex.encode()).hexdigest()
+                salt = token_hex()
 
                 # The generation of suitable Session State values is based
                 # on a salted cryptographic hash of Client ID, origin URL,
