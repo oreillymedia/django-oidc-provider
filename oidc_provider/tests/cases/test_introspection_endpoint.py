@@ -44,7 +44,7 @@ class IntrospectionTestCase(TestCase):
         self.token.save()
 
     def _assert_inactive(self, response):
-        self.assertEqual(response.status_code, 200)
+        assert response.status_code == 200
         self.assertJSONEqual(force_str(response.content), {'active': False})
 
     def _assert_active(self, response, **kwargs):

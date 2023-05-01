@@ -48,19 +48,16 @@ class ClaimsTestCase(TestCase):
             'phone_number': '',
         }
         clean_dict = self.scopeClaims._clean_dic(dict_to_clean)
-        self.assertEqual(
-            clean_dict,
-            {
-                'family_name': 'Doe',
-                'given_name': 'John',
-                'name': 'John Doe',
-                'email': u'johndoe@example.com'
-            }
-        )
+        assert clean_dict == {
+            'family_name': 'Doe',
+            'given_name': 'John',
+            'name': 'John Doe',
+            'email': u'johndoe@example.com',
+        }
 
     def test_locale(self):
         with override_language('fr'):
-            self.assertEqual(str(StandardScopeClaims.info_profile[0]), 'Profil de base')
+            assert str(StandardScopeClaims.info_profile[0]) == 'Profil de base'
 
     def test_scopeclaims_class_inheritance(self):
         # Generate example class that will be used for `OIDC_EXTRA_SCOPE_CLAIMS` setting.
