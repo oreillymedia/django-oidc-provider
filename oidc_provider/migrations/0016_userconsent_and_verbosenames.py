@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
             model_name='userconsent',
             name='date_given',
             field=models.DateTimeField(
-                default=datetime.datetime(2016, 6, 10, 17, 53, 48, 889808, tzinfo=timezone.utc), verbose_name='Date Given'),
+                default=datetime.datetime(2016, 6, 10, 17, 53, 48, 889808, tzinfo=datetime.timezone.utc), verbose_name='Date Given'),
             preserve_default=False,
         ),
         migrations.AlterField(

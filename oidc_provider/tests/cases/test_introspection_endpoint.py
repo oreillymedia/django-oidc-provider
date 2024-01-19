@@ -44,7 +44,7 @@ class IntrospectionTestCase(TestCase):
         self.token.save()
 
     def _assert_inactive(self, response):
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
         self.assertJSONEqual(force_str(response.content), {'active': False})
 
     def _assert_active(self, response, **kwargs):
@@ -130,3 +130,8 @@ class IntrospectionTestCase(TestCase):
             'active': True,
             'client_id': self.client.client_id,
         })
+
+    @override_settings(OIDC_INTROSPECTION_RESPONSE_SCOPE_ENABLE=True)
+    def test_enable_scope(self):
+        response = self._make_request()
+        self._assert_active(response, scope='openid email')
