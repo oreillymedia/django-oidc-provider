@@ -1,7 +1,8 @@
+import mock
+
 from django.urls import re_path
 from django.test import TestCase, override_settings
 from django.views.generic import View
-from mock import mock
 
 
 class StubbedViews:

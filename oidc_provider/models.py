@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import base64
 import binascii
 from hashlib import md5, sha256
@@ -264,4 +263,6 @@ class RSAKey(models.Model):
 
     @property
     def kid(self):
-        return u'{0}'.format(md5(self.key.encode('utf-8'), usedforsecurity=False).hexdigest() if self.key else '')
+        return u'{0}'.format(
+            md5(self.key.encode('utf-8'), usedforsecurity=False).hexdigest() if self.key else ''
+        )
