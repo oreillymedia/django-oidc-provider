@@ -327,7 +327,7 @@ class JwksView(View):
         dic = dict(keys=[])
 
         for rsakey in RSAKey.objects.all():
-            public_key = RSA.importKey(rsakey.key).publickey()
+            public_key = RSA.importKey(rsakey.pem).publickey()
             dic['keys'].append({
                 'kty': 'RSA',
                 'alg': 'RS256',

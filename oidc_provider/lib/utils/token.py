@@ -156,7 +156,7 @@ def get_client_alg_keys(client):
     if client.jwt_alg == 'RS256':
         keys = []
         for rsakey in RSAKey.objects.all():
-            keys.append(jwk_RSAKey(key=importKey(rsakey.key), kid=rsakey.kid))
+            keys.append(jwk_RSAKey(key=importKey(rsakey.pem), kid=rsakey.kid))
         if not keys:
             raise Exception('You must add at least one RSA Key.')
     elif client.jwt_alg == 'HS256':

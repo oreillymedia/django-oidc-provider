@@ -214,6 +214,20 @@ class DefaultSettings(object):
         """
         return False
 
+    @property
+    def OIDC_RSA_ENCRYPT_HOOK(self):
+        """
+        OPTIONAL. A string with the location of a function used to encrypt RSA keys. 
+        """
+        return None
+
+    @property
+    def OIDC_RSA_DECRYPT_HOOK(self):
+        """
+        OPTIONAL. A string with the location of a function used to decrypt RSA keys. 
+        """
+        return None
+
 
 default_settings = DefaultSettings()
 
@@ -234,6 +248,8 @@ def import_from_str(value):
 
 def import_hook(hook_name):
     hook_path = get(hook_name.upper())
+    if hook_path is None:
+        return None
     return import_from_str(hook_path)
 
 

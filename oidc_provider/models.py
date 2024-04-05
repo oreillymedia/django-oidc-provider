@@ -4,10 +4,12 @@ import hashlib
 from hashlib import sha256
 import json
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
+from oidc_provider import settings as oidc_settings
 
 
 CLIENT_TYPE_CHOICES = [
@@ -28,6 +30,10 @@ JWT_ALGS = [
     ('HS256', 'HS256'),
     ('RS256', 'RS256'),
 ]
+
+
+rsa_encrypt = oidc_settings.import_hook("OIDC_RSA_ENCRYPT_HOOK")
+rsa_decrypt = oidc_settings.import_hook("OIDC_RSA_DECRYPT_HOOK")
 
 
 class ResponseTypeManager(models.Manager):
@@ -251,6 +257,7 @@ class RSAKey(models.Model):
 
     key = models.TextField(
         verbose_name=_(u'Key'), help_text=_(u'Paste your private RSA Key here.'))
+    encrypted = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _(u'RSA Key')
@@ -262,10 +269,38 @@ class RSAKey(models.Model):
     def __unicode__(self):
         return self.__str__()
 
+    def clean(self):
+        super().clean()
+        if self.encrypted and rsa_encrypt is None:
+            raise ValidationError(
+                "Could not encrypt key value. settings.OIDC_RSA_ENCRYPT_HOOK is not defined."
+            )
+
+    def save(self, *args, **kwargs):
+        if self.encrypted:
+            encrypted = rsa_encrypt(self.key.encode())
+            self.key = base64.b64encode(encrypted).decode()
+        super().save(*args, **kwargs)
+
+    @property
+    def pem(self):
+        if not self.encrypted:
+            return self.key
+
+        if rsa_decrypt is None:
+            raise AttributeError(
+                "Could not decrypt key value. settings.OIDC_RSA_DECRYPT_HOOK is not defined."
+            )
+
+        encrypted = base64.b64decode(self.key)
+        return rsa_decrypt(encrypted).decode()
+
     @property
     def kid(self):
-        return u'{0}'.format(
-            hashlib.new("md5", self.key.encode('utf-8'), usedforsecurity=False).hexdigest()
+        return "{0}".format(
+            hashlib.new(
+                "md5", self.pem.encode("utf-8"), usedforsecurity=False
+            ).hexdigest()
             if self.key
             else ''
         )
