@@ -1,5 +1,6 @@
 import hashlib
 import logging
+import os
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -326,7 +327,12 @@ class JwksView(View):
     def get(self, request, *args, **kwargs):
         dic = dict(keys=[])
 
-        for rsakey in RSAKey.objects.all():
+        if os.environ.get("OIDC_RSA_KEY"):
+            rsakeys = [RSAKey(key=os.environ["OIDC_RSA_KEY"])]
+        else:
+            rsakeys = RSAKey.objects.all()
+
+        for rsakey in rsakeys:
             public_key = RSA.importKey(rsakey.key).publickey()
             dic['keys'].append({
                 'kty': 'RSA',
