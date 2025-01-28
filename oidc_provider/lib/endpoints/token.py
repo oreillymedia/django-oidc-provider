@@ -162,9 +162,9 @@ class TokenEndpoint(object):
                     logger.error(
                         "[Token] The request scope %s is not supported by client %s",
                         scope_requested,
-                        self.client.client_id
+                        self.client.client_id,
                     )
-                    raise TokenError('invalid_scope')
+                    raise TokenError("invalid_scope")
         # if no scopes requested assign client's scopes
         else:
             token_scopes.extend(self.client.scope)
@@ -198,9 +198,7 @@ class TokenEndpoint(object):
             scope=self.code.scope,
         )
 
-        create_id_token_hook = settings.import_hook(
-            'OIDC_IDTOKEN_CREATE_HOOK'
-        )
+        create_id_token_hook = settings.import_hook("OIDC_IDTOKEN_CREATE_HOOK")
 
         if self.code.is_authentication:
             id_token_dic = create_id_token_hook(
@@ -248,9 +246,7 @@ class TokenEndpoint(object):
         )
 
         # If the Token has an id_token it's an Authentication request.
-        create_id_token_hook = settings.import_hook(
-            'OIDC_IDTOKEN_CREATE_HOOK'
-        )
+        create_id_token_hook = settings.import_hook("OIDC_IDTOKEN_CREATE_HOOK")
         if self.token.id_token:
             id_token_dic = create_id_token_hook(
                 user=self.token.user,
@@ -283,7 +279,6 @@ class TokenEndpoint(object):
 
     def create_access_token_response_dic(self):
         # See https://tools.ietf.org/html/rfc6749#section-4.3
-
         token_scopes = self.validate_requested_scopes()
         token = self.create_token(
             self.user,
@@ -291,9 +286,7 @@ class TokenEndpoint(object):
             token_scopes,
         )
 
-        create_id_token_hook = settings.import_hook(
-            'OIDC_IDTOKEN_CREATE_HOOK'
-        )
+        create_id_token_hook = settings.import_hook("OIDC_IDTOKEN_CREATE_HOOK")
 
         id_token_dic = create_id_token_hook(
             token=token,
@@ -311,10 +304,10 @@ class TokenEndpoint(object):
         return {
             "access_token": token.access_token,
             "refresh_token": token.refresh_token,
-            "expires_in": settings.get('OIDC_TOKEN_EXPIRE'),
-            "token_type": 'bearer',
+            "expires_in": settings.get("OIDC_TOKEN_EXPIRE"),
+            "token_type": "bearer",
             "id_token": self._encode_id_token(id_token_dic, token.client),
-            "scope": ' '.join(token.scope),
+            "scope": " ".join(token.scope),
         }
 
     def create_client_credentials_response_dic(self):
