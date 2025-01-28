@@ -1,6 +1,6 @@
 certifi>=2022.12.7
 chardet>=5.1.0
-Django==3.2.18
+Django>=4,<5
 idna>=3
 mock>=5
 pbr>=5
