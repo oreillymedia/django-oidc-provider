@@ -287,7 +287,7 @@ class AuthorizationCodeFlowTestCase(TestCase, AuthorizeEndpointMixin):
             msg='More than state or code appended as query params')
 
         self.assertTrue(
-            response['Location'].startswith(self.client.default_redirect_uri), 
+            response['Location'].startswith(self.client.default_redirect_uri),
             msg='Different redirect_uri returned')
 
     def test_unknown_redirect_uris_are_rejected(self):
