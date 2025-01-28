@@ -288,8 +288,7 @@ class AuthorizationCodeFlowTestCase(TestCase, AuthorizeEndpointMixin):
 
         self.assertTrue(
             response['Location'].startswith(self.client.default_redirect_uri), 
-            msg='Different redirect_uri returned'
-        )
+            msg='Different redirect_uri returned')
 
     def test_unknown_redirect_uris_are_rejected(self):
         """
