@@ -1,7 +1,6 @@
 import base64
 import binascii
-import hashlib
-from hashlib import sha256
+from hashlib import md5, sha256
 import json
 
 from django.db import models
@@ -253,6 +252,7 @@ class RSAKey(models.Model):
         verbose_name=_(u'Key'), help_text=_(u'Paste your private RSA Key here.'))
 
     class Meta:
+        ordering = ["id"]
         verbose_name = _(u'RSA Key')
         verbose_name_plural = _(u'RSA Keys')
 
@@ -264,8 +264,4 @@ class RSAKey(models.Model):
 
     @property
     def kid(self):
-        return u'{0}'.format(
-            hashlib.new("md5", self.key.encode('utf-8'), usedforsecurity=False).hexdigest()
-            if self.key
-            else ''
-        )
+        return u'{0}'.format(md5(self.key.encode('utf-8')).hexdigest() if self.key else '')

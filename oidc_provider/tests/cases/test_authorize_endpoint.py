@@ -280,14 +280,15 @@ class AuthorizationCodeFlowTestCase(TestCase, AuthorizeEndpointMixin):
         is_code_ok = is_code_valid(url=response['Location'],
                                    user=self.user,
                                    client=self.client)
-        assert is_code_ok, 'Code returned is invalid or missing'
+        self.assertTrue(is_code_ok, msg='Code returned is invalid or missing')
 
         self.assertEqual(
             set(params.keys()), {'state', 'code'},
             msg='More than state or code appended as query params')
 
-        assert response['Location'].startswith(self.client.default_redirect_uri), \
-            'Different redirect_uri returned'
+        self.assertTrue(
+            response['Location'].startswith(self.client.default_redirect_uri),
+            msg='Different redirect_uri returned')
 
     def test_unknown_redirect_uris_are_rejected(self):
         """
