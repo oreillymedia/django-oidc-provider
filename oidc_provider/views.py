@@ -300,6 +300,9 @@ class ProviderInfoView(View):
         if settings.get("OIDC_SESSION_MANAGEMENT_ENABLE"):
             dic["check_session_iframe"] = site_url + reverse("oidc_provider:check-session-iframe")
 
+        if settings.get('OIDC_SCOPES_SUPPORTED'):
+            dic['scopes_supported'] = settings.get('OIDC_SCOPES_SUPPORTED')
+
         return dic
 
     def _build_cache_key(self, request):

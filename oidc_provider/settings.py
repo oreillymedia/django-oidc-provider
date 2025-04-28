@@ -214,6 +214,13 @@ class DefaultSettings(object):
         """
         return False
 
+    @property
+    def OIDC_SCOPES_SUPPORTED(self):
+        """
+        OPTIONAL: A list of scopes supported by the OP.
+        """
+        return ['openid']
+
 
 default_settings = DefaultSettings()
 
