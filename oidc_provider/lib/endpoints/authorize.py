@@ -1,6 +1,5 @@
 import logging
 from datetime import timedelta
-from hashlib import md5
 from hashlib import sha256
 
 try:
@@ -16,7 +15,6 @@ except ImportError:
     from urllib.parse import urlunsplit
 
 from secrets import token_hex
-from uuid import uuid4
 
 from django.utils import timezone
 
@@ -27,9 +25,7 @@ from oidc_provider.lib.errors import ClientIdError
 from oidc_provider.lib.errors import RedirectUriError
 from oidc_provider.lib.utils.common import get_browser_state_or_default
 from oidc_provider.lib.utils.token import create_code
-from oidc_provider.lib.utils.token import create_id_token
 from oidc_provider.lib.utils.token import create_token
-from oidc_provider.lib.utils.token import encode_id_token
 from oidc_provider.models import Client
 from oidc_provider.models import UserConsent
 
