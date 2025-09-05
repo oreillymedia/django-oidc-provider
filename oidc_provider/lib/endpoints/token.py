@@ -57,7 +57,7 @@ class TokenEndpoint(object):
             self.client = Client.objects.get(client_id=self.params["client_id"])
         except Client.DoesNotExist:
             logger.info(
-                "[OIDC:Token] Client does not exist: %s",
+                "[Token] Client does not exist: %s",
                 self.params["client_id"],
                 extra=log_extra,
             )
@@ -66,7 +66,7 @@ class TokenEndpoint(object):
         if self.client.client_type == "confidential":
             if not (self.client.client_secret == self.params["client_secret"]):
                 logger.info(
-                    "[OIDC:Token] Invalid client secret: client %s do not have secret %s",
+                    "[Token] Invalid client secret: client %s do not have secret %s",
                     self.client.client_id,
                     self.client.client_secret,
                     extra=log_extra,
@@ -76,7 +76,7 @@ class TokenEndpoint(object):
         if self.params["grant_type"] == "authorization_code":
             if self.params["redirect_uri"] not in self.client.redirect_uris:
                 logger.info(
-                    "[OIDC:Token] Invalid redirect uri: %s",
+                    "[Token] Invalid redirect uri: %s",
                     self.params["redirect_uri"],
                     extra=log_extra,
                 )
@@ -88,22 +88,25 @@ class TokenEndpoint(object):
                 )
             except DatabaseError:
                 logger.info(
-                    "[OIDC:Token] Code cannot be reused: %s",
+                    "[Token] Code cannot be reused: %s",
                     self.params["code"],
                     extra=log_extra,
                 )
                 raise TokenError("invalid_grant")
             except Code.DoesNotExist:
                 logger.info(
-                    "[OIDC:Token] Code does not exist: %s",
+                    "[Token] Code does not exist: %s",
                     self.params["code"],
                     extra=log_extra,
                 )
                 raise TokenError("invalid_grant")
 
+            # Log the id instead of the code itself to reduce leak risk. We can look it up.
+            log_extra["code_id"] = self.code.id
+
             if not (self.code.client == self.client) or self.code.has_expired():
                 logger.info(
-                    "[OIDC:Token] Invalid code: invalid client or code has expired",
+                    "[Token] Invalid code: invalid client or code has expired",
                     extra=log_extra,
                 )
                 raise TokenError("invalid_grant")
@@ -111,7 +114,7 @@ class TokenEndpoint(object):
             # Validate PKCE parameters.
             if self.code.code_challenge:
                 if self.params["code_verifier"] is None:
-                    logger.info("[OIDC:Token] Missing code_verifier", extra=log_extra)
+                    logger.info("[Token] Missing code_verifier", extra=log_extra)
                     raise TokenError("invalid_grant")
 
                 if self.code.code_challenge_method == "S256":
@@ -128,7 +131,7 @@ class TokenEndpoint(object):
                 # TODO: We should explain the error.
                 if not (new_code_challenge == self.code.code_challenge):
                     logger.info(
-                        "[OIDC:Token] code verifier did not match code challenge",
+                        "[Token] code verifier did not match code challenge",
                         extra=log_extra,
                     )
                     raise TokenError("invalid_grant")
@@ -154,7 +157,7 @@ class TokenEndpoint(object):
 
         elif self.params["grant_type"] == "refresh_token":
             if not self.params["refresh_token"]:
-                logger.info("[OIDC:Token] Missing refresh token")
+                logger.info("[Token] Missing refresh token")
                 raise TokenError("invalid_grant")
 
             try:
@@ -164,15 +167,15 @@ class TokenEndpoint(object):
 
             except Token.DoesNotExist:
                 logger.info(
-                    "[OIDC:Token] Refresh token does not exist: %s", self.params["refresh_token"]
+                    "[Token] Refresh token does not exist: %s", self.params["refresh_token"]
                 )
                 raise TokenError("invalid_grant")
         elif self.params["grant_type"] == "client_credentials":
             if not self.client._scope:
-                logger.info("[OIDC:Token] Client using client credentials with empty scope")
+                logger.info("[Token] Client using client credentials with empty scope")
                 raise TokenError("invalid_scope")
         else:
-            logger.info("[OIDC:Token] Invalid grant type: %s", self.params["grant_type"])
+            logger.info("[Token] Invalid grant type: %s", self.params["grant_type"])
             raise TokenError("unsupported_grant_type")
 
     def validate_requested_scopes(self):
@@ -189,7 +192,7 @@ class TokenEndpoint(object):
                     token_scopes.append(scope_requested)
                 else:
                     logger.error(
-                        "[OIDC:Token] The request scope %s is not supported by client %s",
+                        "[Token] The request scope %s is not supported by client %s",
                         scope_requested,
                         self.client.client_id,
                     )
