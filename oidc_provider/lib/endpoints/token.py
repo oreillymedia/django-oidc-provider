@@ -47,24 +47,39 @@ class TokenEndpoint(object):
         self.params["password"] = self.request.POST.get("password", "")
 
     def validate_params(self):
+        log_extra = {
+            "client_id": self.params["client_id"],
+            "redirecT_uri": self.params["redirect_uri"],
+            "grant_type": self.params["grant_type"],
+            "scope": self.params["scope"],
+        }
         try:
             self.client = Client.objects.get(client_id=self.params["client_id"])
         except Client.DoesNotExist:
-            logger.debug("[Token] Client does not exist: %s", self.params["client_id"])
+            logger.info(
+                "[Token] Client does not exist: %s",
+                self.params["client_id"],
+                extra=log_extra,
+            )
             raise TokenError("invalid_client")
 
         if self.client.client_type == "confidential":
             if not (self.client.client_secret == self.params["client_secret"]):
-                logger.debug(
+                logger.info(
                     "[Token] Invalid client secret: client %s do not have secret %s",
                     self.client.client_id,
                     self.client.client_secret,
+                    extra=log_extra,
                 )
                 raise TokenError("invalid_client")
 
         if self.params["grant_type"] == "authorization_code":
             if self.params["redirect_uri"] not in self.client.redirect_uris:
-                logger.debug("[Token] Invalid redirect uri: %s", self.params["redirect_uri"])
+                logger.info(
+                    "[Token] Invalid redirect uri: %s",
+                    self.params["redirect_uri"],
+                    extra=log_extra,
+                )
                 raise TokenError("invalid_client")
 
             try:
@@ -72,19 +87,34 @@ class TokenEndpoint(object):
                     code=self.params["code"]
                 )
             except DatabaseError:
-                logger.debug("[Token] Code cannot be reused: %s", self.params["code"])
+                logger.info(
+                    "[Token] Code cannot be reused: %s",
+                    self.params["code"],
+                    extra=log_extra,
+                )
                 raise TokenError("invalid_grant")
             except Code.DoesNotExist:
-                logger.debug("[Token] Code does not exist: %s", self.params["code"])
+                logger.info(
+                    "[Token] Code does not exist: %s",
+                    self.params["code"],
+                    extra=log_extra,
+                )
                 raise TokenError("invalid_grant")
 
+            # Log the id instead of the code itself to reduce leak risk. We can look it up.
+            log_extra["code_id"] = self.code.id
+
             if not (self.code.client == self.client) or self.code.has_expired():
-                logger.debug("[Token] Invalid code: invalid client or code has expired")
+                logger.info(
+                    "[Token] Invalid code: invalid client or code has expired",
+                    extra=log_extra,
+                )
                 raise TokenError("invalid_grant")
 
             # Validate PKCE parameters.
             if self.code.code_challenge:
                 if self.params["code_verifier"] is None:
+                    logger.info("[Token] Missing code_verifier", extra=log_extra)
                     raise TokenError("invalid_grant")
 
                 if self.code.code_challenge_method == "S256":
@@ -100,6 +130,10 @@ class TokenEndpoint(object):
 
                 # TODO: We should explain the error.
                 if not (new_code_challenge == self.code.code_challenge):
+                    logger.info(
+                        "[Token] code verifier did not match code challenge",
+                        extra=log_extra,
+                    )
                     raise TokenError("invalid_grant")
 
         elif self.params["grant_type"] == "password":
@@ -123,7 +157,7 @@ class TokenEndpoint(object):
 
         elif self.params["grant_type"] == "refresh_token":
             if not self.params["refresh_token"]:
-                logger.debug("[Token] Missing refresh token")
+                logger.info("[Token] Missing refresh token")
                 raise TokenError("invalid_grant")
 
             try:
@@ -132,16 +166,16 @@ class TokenEndpoint(object):
                 )
 
             except Token.DoesNotExist:
-                logger.debug(
+                logger.info(
                     "[Token] Refresh token does not exist: %s", self.params["refresh_token"]
                 )
                 raise TokenError("invalid_grant")
         elif self.params["grant_type"] == "client_credentials":
             if not self.client._scope:
-                logger.debug("[Token] Client using client credentials with empty scope")
+                logger.info("[Token] Client using client credentials with empty scope")
                 raise TokenError("invalid_scope")
         else:
-            logger.debug("[Token] Invalid grant type: %s", self.params["grant_type"])
+            logger.info("[Token] Invalid grant type: %s", self.params["grant_type"])
             raise TokenError("unsupported_grant_type")
 
     def validate_requested_scopes(self):
