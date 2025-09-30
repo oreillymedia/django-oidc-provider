@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("oidc_provider", "0026_client_multiple_response_types"),
     ]

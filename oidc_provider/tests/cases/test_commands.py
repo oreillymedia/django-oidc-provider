@@ -5,7 +5,6 @@ from django.test import TestCase
 
 
 class CommandsTest(TestCase):
-
     def test_creatersakey_output(self):
         out = StringIO()
         call_command("creatersakey", stdout=out)

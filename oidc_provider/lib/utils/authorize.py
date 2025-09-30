@@ -1,8 +1,14 @@
 try:
     from urllib import urlencode
-    from urlparse import urlsplit, parse_qs, urlunsplit
+
+    from urlparse import parse_qs
+    from urlparse import urlsplit
+    from urlparse import urlunsplit
 except ImportError:
-    from urllib.parse import urlsplit, parse_qs, urlunsplit, urlencode
+    from urllib.parse import parse_qs
+    from urllib.parse import urlencode
+    from urllib.parse import urlsplit
+    from urllib.parse import urlunsplit
 
 
 def strip_prompt_login(path):

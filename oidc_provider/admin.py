@@ -2,15 +2,18 @@ from hashlib import sha224
 from random import randint
 from uuid import uuid4
 
-from django.forms import ModelForm
 from django.contrib import admin
+from django.forms import ModelForm
 from django.utils.translation import gettext_lazy as _
 
-from oidc_provider.models import Client, Code, Token, RSAKey
+from oidc_provider.lib.utils.sanitization import sanitize_client_id
+from oidc_provider.models import Client
+from oidc_provider.models import Code
+from oidc_provider.models import RSAKey
+from oidc_provider.models import Token
 
 
 class ClientForm(ModelForm):
-
     class Meta:
         model = Client
         exclude = []
@@ -21,12 +24,15 @@ class ClientForm(ModelForm):
         self.fields["client_id"].widget.attrs["disabled"] = "true"
         self.fields["client_secret"].required = False
         self.fields["client_secret"].widget.attrs["disabled"] = "true"
+        self.fields["jwt_alg"].required = False
 
     def clean_client_id(self):
         instance = getattr(self, "instance", None)
         if instance and instance.pk:
-            return instance.client_id
+            # Sanitize existing client_id to remove any problematic characters
+            return sanitize_client_id(instance.client_id)
         else:
+            # Generate new client_id (digits only)
             return str(randint(1, 999999)).zfill(6)
 
     def clean_client_secret(self):
@@ -35,13 +41,9 @@ class ClientForm(ModelForm):
         secret = ""
 
         if instance and instance.pk:
-            if (
-                self.cleaned_data["client_type"] == "confidential"
-            ) and not instance.client_secret:
+            if (self.cleaned_data["client_type"] == "confidential") and not instance.client_secret:
                 secret = sha224(uuid4().hex.encode()).hexdigest()
-            elif (
-                self.cleaned_data["client_type"] == "confidential"
-            ) and instance.client_secret:
+            elif (self.cleaned_data["client_type"] == "confidential") and instance.client_secret:
                 secret = instance.client_secret
         else:
             if self.cleaned_data["client_type"] == "confidential":
@@ -52,7 +54,6 @@ class ClientForm(ModelForm):
 
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
-
     fieldsets = [
         [
             _(""),
@@ -78,13 +79,7 @@ class ClientAdmin(admin.ModelAdmin):
         [
             _("Information"),
             {
-                "fields": (
-                    "contact_email",
-                    "website_url",
-                    "terms_url",
-                    "logo",
-                    "date_created",
-                ),
+                "fields": ("contact_email", "website_url", "terms_url", "logo", "date_created"),
             },
         ],
         [
@@ -103,7 +98,6 @@ class ClientAdmin(admin.ModelAdmin):
 
 @admin.register(Code)
 class CodeAdmin(admin.ModelAdmin):
-
     raw_id_fields = ["user"]
 
     def has_add_permission(self, request):
@@ -112,7 +106,6 @@ class CodeAdmin(admin.ModelAdmin):
 
 @admin.register(Token)
 class TokenAdmin(admin.ModelAdmin):
-
     raw_id_fields = ["user"]
 
     def has_add_permission(self, request):
@@ -121,5 +114,4 @@ class TokenAdmin(admin.ModelAdmin):
 
 @admin.register(RSAKey)
 class RSAKeyAdmin(admin.ModelAdmin):
-
     readonly_fields = ["kid"]

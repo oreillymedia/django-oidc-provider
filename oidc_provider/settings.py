@@ -118,8 +118,7 @@ class DefaultSettings(object):
         # Memoize generated value
         if not self._unauthenticated_session_management_key:
             self._unauthenticated_session_management_key = "".join(
-                random.choice(string.ascii_uppercase + string.digits)
-                for _ in range(100)
+                random.choice(string.ascii_uppercase + string.digits) for _ in range(100)
             )
         return self._unauthenticated_session_management_key
 
@@ -204,10 +203,7 @@ class DefaultSettings(object):
 
     @property
     def OIDC_TEMPLATES(self):
-        return {
-            "authorize": "oidc_provider/authorize.html",
-            "error": "oidc_provider/error.html",
-        }
+        return {"authorize": "oidc_provider/authorize.html", "error": "oidc_provider/error.html"}
 
     @property
     def OIDC_INTROSPECTION_RESPONSE_SCOPE_ENABLE(self):
@@ -237,11 +233,7 @@ def import_from_str(value):
         module = importlib.import_module(module_path)
         return getattr(module, class_name)
     except ImportError as e:
-        msg = "Could not import %s for settings. %s: %s." % (
-            value,
-            e.__class__.__name__,
-            e,
-        )
+        msg = "Could not import %s for settings. %s: %s." % (value, e.__class__.__name__, e)
         raise ImportError(msg)
 
 

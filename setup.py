@@ -1,8 +1,7 @@
 import os
-from setuptools import (
-    find_packages,
-    setup,
-)
+
+from setuptools import find_packages
+from setuptools import setup
 
 version = {}
 with open("./oidc_provider/version.py") as fp:
@@ -36,15 +35,18 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Topic :: Internet :: WWW/HTTP",
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
     ],
     test_suite="runtests.runtests",
     tests_require=[
-        "pyjwkest>=1.3.0",
-        "mock>=2.0.0",
+        "PyJWT>=2.8.0",
+        "cryptography>=3.4.0",
     ],
     install_requires=[
-        "pyjwkest>=1.3.0",
+        "PyJWT>=2.8.0",
+        "cryptography>=3.4.0",
     ],
 )

@@ -3,15 +3,14 @@
 from __future__ import unicode_literals
 
 import datetime
-from datetime import timezone
 
-from django.conf import settings
-from django.db import migrations, models
 import django.db.models.deletion
+from django.conf import settings
+from django.db import migrations
+from django.db import models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("oidc_provider", "0015_change_client_code"),
     ]
@@ -32,17 +31,13 @@ class Migration(migrations.Migration):
             model_name="client",
             name="_redirect_uris",
             field=models.TextField(
-                default=b"",
-                help_text="Enter each URI on a new line.",
-                verbose_name="Redirect URIs",
+                default=b"", help_text="Enter each URI on a new line.", verbose_name="Redirect URIs"
             ),
         ),
         migrations.AlterField(
             model_name="client",
             name="client_id",
-            field=models.CharField(
-                max_length=255, unique=True, verbose_name="Client ID"
-            ),
+            field=models.CharField(max_length=255, unique=True, verbose_name="Client ID"),
         ),
         migrations.AlterField(
             model_name="client",
@@ -108,16 +103,12 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="code",
             name="code_challenge",
-            field=models.CharField(
-                max_length=255, null=True, verbose_name="Code Challenge"
-            ),
+            field=models.CharField(max_length=255, null=True, verbose_name="Code Challenge"),
         ),
         migrations.AlterField(
             model_name="code",
             name="code_challenge_method",
-            field=models.CharField(
-                max_length=255, null=True, verbose_name="Code Challenge Method"
-            ),
+            field=models.CharField(max_length=255, null=True, verbose_name="Code Challenge Method"),
         ),
         migrations.AlterField(
             model_name="code",
@@ -132,9 +123,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="code",
             name="nonce",
-            field=models.CharField(
-                blank=True, default=b"", max_length=255, verbose_name="Nonce"
-            ),
+            field=models.CharField(blank=True, default=b"", max_length=255, verbose_name="Nonce"),
         ),
         migrations.AlterField(
             model_name="code",
@@ -165,9 +154,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="token",
             name="access_token",
-            field=models.CharField(
-                max_length=255, unique=True, verbose_name="Access Token"
-            ),
+            field=models.CharField(max_length=255, unique=True, verbose_name="Access Token"),
         ),
         migrations.AlterField(
             model_name="token",

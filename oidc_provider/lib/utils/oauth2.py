@@ -1,12 +1,11 @@
-from base64 import b64decode
 import logging
 import re
+from base64 import b64decode
 
 from django.http import HttpResponse
 
 from oidc_provider.lib.errors import BearerTokenError
 from oidc_provider.models import Token
-
 
 logger = logging.getLogger(__name__)
 
@@ -82,10 +81,8 @@ def protected_resource_view(scopes=None):
                     raise BearerTokenError("insufficient_scope")
             except BearerTokenError as error:
                 response = HttpResponse(status=error.status)
-                response["WWW-Authenticate"] = (
-                    'error="{0}", error_description="{1}"'.format(
-                        error.code, error.description
-                    )
+                response["WWW-Authenticate"] = 'error="{0}", error_description="{1}"'.format(
+                    error.code, error.description
                 )
                 return response
 
