@@ -3,6 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 from hashlib import md5
 from hashlib import sha256
+from secrets import token_hex
 
 from oidc_provider.compat import get_attr_or_callable
 
