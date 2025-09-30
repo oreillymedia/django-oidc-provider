@@ -12,7 +12,6 @@ from oidc_provider.lib.errors import TokenError
 from oidc_provider.lib.errors import UserAuthError
 from oidc_provider.lib.utils.oauth2 import extract_client_auth
 from oidc_provider.lib.utils.sanitization import sanitize_client_id
-from oidc_provider.lib.utils.token import create_id_token
 from oidc_provider.lib.utils.token import create_token
 from oidc_provider.lib.utils.token import encode_id_token
 from oidc_provider.models import Client

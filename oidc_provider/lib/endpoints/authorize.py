@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from datetime import timedelta
-from hashlib import md5
 from hashlib import sha256
 from secrets import token_hex
 
@@ -18,7 +17,6 @@ except ImportError:
     from urllib.parse import urlencode
     from urllib.parse import urlsplit
     from urllib.parse import urlunsplit
-from uuid import uuid4
 
 from django.utils import dateformat
 from django.utils import timezone
