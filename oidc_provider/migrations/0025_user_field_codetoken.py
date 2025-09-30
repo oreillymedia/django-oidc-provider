@@ -8,18 +8,28 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('oidc_provider', '0024_auto_20180327_1959'),
+        ("oidc_provider", "0024_auto_20180327_1959"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='client',
-            name='_scope',
-            field=models.TextField(blank=True, default='', help_text='Specifies the authorized scope values for the client app.', verbose_name='Scopes'),
+            model_name="client",
+            name="_scope",
+            field=models.TextField(
+                blank=True,
+                default="",
+                help_text="Specifies the authorized scope values for the client app.",
+                verbose_name="Scopes",
+            ),
         ),
         migrations.AlterField(
-            model_name='token',
-            name='user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='User'),
+            model_name="token",
+            name="user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="User",
+            ),
         ),
     ]

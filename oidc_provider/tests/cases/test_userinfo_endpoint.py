@@ -1,6 +1,7 @@
 import json
 
 from datetime import timedelta
+
 try:
     from urllib.parse import urlencode
 except ImportError:
@@ -31,7 +32,7 @@ class UserInfoTestCase(TestCase):
     def setUp(self):
         self.factory = RequestFactory()
         self.user = create_fake_user()
-        self.client = create_fake_client(response_type='code')
+        self.client = create_fake_client(response_type="code")
 
     def _create_token(self, extra_scope=None):
         """
@@ -39,12 +40,9 @@ class UserInfoTestCase(TestCase):
         """
         if extra_scope is None:
             extra_scope = []
-        scope = ['openid', 'email'] + extra_scope
+        scope = ["openid", "email"] + extra_scope
 
-        token = create_token(
-            user=self.user,
-            client=self.client,
-            scope=scope)
+        token = create_token(user=self.user, client=self.client, scope=scope)
 
         id_token_dic = create_id_token(
             token=token,
@@ -59,17 +57,17 @@ class UserInfoTestCase(TestCase):
 
         return token
 
-    def _post_request(self, access_token, schema='Bearer'):
+    def _post_request(self, access_token, schema="Bearer"):
         """
         Makes a request to the userinfo endpoint by sending the
         `post_data` parameters using the 'multipart/form-data'
         format.
         """
-        url = reverse('oidc_provider:userinfo')
+        url = reverse("oidc_provider:userinfo")
 
-        request = self.factory.post(url, data={}, content_type='multipart/form-data')
+        request = self.factory.post(url, data={}, content_type="multipart/form-data")
 
-        request.META['HTTP_AUTHORIZATION'] = schema + ' ' + access_token
+        request.META["HTTP_AUTHORIZATION"] = schema + " " + access_token
 
         response = userinfo(request)
 
@@ -91,7 +89,7 @@ class UserInfoTestCase(TestCase):
         """
         token = self._create_token()
 
-        response = self._post_request(token.access_token, schema='bearer')
+        response = self._post_request(token.access_token, schema="bearer")
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(bool(response.content), True)
@@ -108,7 +106,7 @@ class UserInfoTestCase(TestCase):
         self.assertEqual(response.status_code, 401)
 
         try:
-            is_header_field_ok = 'invalid_token' in response['WWW-Authenticate']
+            is_header_field_ok = "invalid_token" in response["WWW-Authenticate"]
         except KeyError:
             is_header_field_ok = False
         self.assertEqual(is_header_field_ok, True)
@@ -116,7 +114,7 @@ class UserInfoTestCase(TestCase):
     def test_response_with_invalid_scope(self):
         token = self._create_token()
 
-        token.scope = ['otherone']
+        token.scope = ["otherone"]
         token.save()
 
         response = self._post_request(token.access_token)
@@ -124,7 +122,7 @@ class UserInfoTestCase(TestCase):
         self.assertEqual(response.status_code, 403)
 
         try:
-            is_header_field_ok = 'insufficient_scope' in response['WWW-Authenticate']
+            is_header_field_ok = "insufficient_scope" in response["WWW-Authenticate"]
         except KeyError:
             is_header_field_ok = False
         self.assertEqual(is_header_field_ok, True)
@@ -136,9 +134,15 @@ class UserInfoTestCase(TestCase):
         """
         token = self._create_token()
 
-        url = reverse('oidc_provider:userinfo') + '?' + urlencode({
-            'access_token': token.access_token,
-        })
+        url = (
+            reverse("oidc_provider:userinfo")
+            + "?"
+            + urlencode(
+                {
+                    "access_token": token.access_token,
+                }
+            )
+        )
 
         request = self.factory.get(url)
         response = userinfo(request)
@@ -147,20 +151,29 @@ class UserInfoTestCase(TestCase):
         self.assertEqual(bool(response.content), True)
 
     def test_user_claims_in_response(self):
-        token = self._create_token(extra_scope=['profile'])
+        token = self._create_token(extra_scope=["profile"])
         response = self._post_request(token.access_token)
-        response_dic = json.loads(response.content.decode('utf-8'))
+        response_dic = json.loads(response.content.decode("utf-8"))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(bool(response.content), True)
-        self.assertIn('given_name', response_dic, msg='"given_name" claim should be in response.')
-        self.assertNotIn('profile', response_dic, msg='"profile" claim should not be in response.')
+        self.assertIn(
+            "given_name", response_dic, msg='"given_name" claim should be in response.'
+        )
+        self.assertNotIn(
+            "profile", response_dic, msg='"profile" claim should not be in response.'
+        )
 
         # Now adding `address` scope.
-        token = self._create_token(extra_scope=['profile', 'address'])
+        token = self._create_token(extra_scope=["profile", "address"])
         response = self._post_request(token.access_token)
-        response_dic = json.loads(response.content.decode('utf-8'))
+        response_dic = json.loads(response.content.decode("utf-8"))
 
-        self.assertIn('address', response_dic, msg='"address" claim should be in response.')
         self.assertIn(
-            'country', response_dic['address'], msg='"country" claim should be in response.')
+            "address", response_dic, msg='"address" claim should be in response.'
+        )
+        self.assertIn(
+            "country",
+            response_dic["address"],
+            msg='"country" claim should be in response.',
+        )

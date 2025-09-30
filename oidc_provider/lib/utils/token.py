@@ -59,7 +59,9 @@ def create_id_token(token, user, aud, nonce="", at_hash="", request=None, scope=
         dic.update(standard_claims.create_response_dic())
 
         if settings.get("OIDC_EXTRA_SCOPE_CLAIMS"):
-            extra_claims = settings.get("OIDC_EXTRA_SCOPE_CLAIMS", import_str=True)(token)
+            extra_claims = settings.get("OIDC_EXTRA_SCOPE_CLAIMS", import_str=True)(
+                token
+            )
             dic.update(extra_claims.create_response_dic())
 
     dic = run_processing_hook(
@@ -116,14 +118,22 @@ def create_token(user, client, scope, id_token_dic=None):
         token.id_token = id_token_dic
 
     token.refresh_token = uuid.uuid4().hex
-    token.expires_at = timezone.now() + timedelta(seconds=settings.get("OIDC_TOKEN_EXPIRE"))
+    token.expires_at = timezone.now() + timedelta(
+        seconds=settings.get("OIDC_TOKEN_EXPIRE")
+    )
     token.scope = scope
 
     return token
 
 
 def create_code(
-    user, client, scope, nonce, is_authentication, code_challenge=None, code_challenge_method=None
+    user,
+    client,
+    scope,
+    nonce,
+    is_authentication,
+    code_challenge=None,
+    code_challenge_method=None,
 ):
     """
     Create and populate a Code object.
@@ -139,7 +149,9 @@ def create_code(
         code.code_challenge = code_challenge
         code.code_challenge_method = code_challenge_method
 
-    code.expires_at = timezone.now() + timedelta(seconds=settings.get("OIDC_CODE_EXPIRE"))
+    code.expires_at = timezone.now() + timedelta(
+        seconds=settings.get("OIDC_CODE_EXPIRE")
+    )
     code.scope = scope
     code.nonce = nonce
     code.is_authentication = is_authentication

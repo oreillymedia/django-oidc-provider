@@ -27,7 +27,7 @@ class TokenEndpoint(object):
         self._extract_params()
 
     def _encode_id_token(self, *args):
-        return settings.import_hook('OIDC_IDTOKEN_ENCODE_HOOK')(*args)
+        return settings.import_hook("OIDC_IDTOKEN_ENCODE_HOOK")(*args)
 
     def _extract_params(self):
         client_id, client_secret = extract_client_auth(self.request)
@@ -120,7 +120,9 @@ class TokenEndpoint(object):
                 if self.code.code_challenge_method == "S256":
                     new_code_challenge = (
                         urlsafe_b64encode(
-                            hashlib.sha256(self.params["code_verifier"].encode("ascii")).digest()
+                            hashlib.sha256(
+                                self.params["code_verifier"].encode("ascii")
+                            ).digest()
                         )
                         .decode("utf-8")
                         .replace("=", "")
@@ -147,7 +149,9 @@ class TokenEndpoint(object):
                 auth_args = ()
 
             user = authenticate(
-                *auth_args, username=self.params["username"], password=self.params["password"]
+                *auth_args,
+                username=self.params["username"],
+                password=self.params["password"]
             )
 
             if not user:
@@ -167,7 +171,8 @@ class TokenEndpoint(object):
 
             except Token.DoesNotExist:
                 logger.info(
-                    "[Token] Refresh token does not exist: %s", self.params["refresh_token"]
+                    "[Token] Refresh token does not exist: %s",
+                    self.params["refresh_token"],
                 )
                 raise TokenError("invalid_grant")
         elif self.params["grant_type"] == "client_credentials":

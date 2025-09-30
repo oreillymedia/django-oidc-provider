@@ -11,13 +11,21 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('oidc_provider', '0022_auto_20170331_1626'),
+        ("oidc_provider", "0022_auto_20170331_1626"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='client',
-            name='owner',
-            field=models.ForeignKey(blank=True, default=None, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='oidc_clients_set', to=settings.AUTH_USER_MODEL, verbose_name='Owner'),
+            model_name="client",
+            name="owner",
+            field=models.ForeignKey(
+                blank=True,
+                default=None,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="oidc_clients_set",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Owner",
+            ),
         ),
     ]

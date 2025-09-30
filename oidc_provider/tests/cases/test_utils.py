@@ -44,7 +44,9 @@ class CommonTest(TestCase):
 
         # `SITE_URL` not set, from `request`
         with self.settings(SITE_URL=""):
-            self.assertEqual(get_issuer(request=request), "http://host-from-request:8888/openid")
+            self.assertEqual(
+                get_issuer(request=request), "http://host-from-request:8888/openid"
+            )
 
         # use settings first if both are provided
         self.assertEqual(get_issuer(request=request), "http://localhost:8000/openid")
@@ -119,13 +121,17 @@ class TokenTest(TestCase):
 
 class BrowserStateTest(TestCase):
     @override_settings(OIDC_UNAUTHENTICATED_SESSION_MANAGEMENT_KEY="my_static_key")
-    def test_get_browser_state_uses_value_from_settings_to_calculate_browser_state(self):
+    def test_get_browser_state_uses_value_from_settings_to_calculate_browser_state(
+        self,
+    ):
         request = HttpRequest()
         request.session = mock.Mock(session_key=None)
         state = get_browser_state_or_default(request)
         self.assertEqual(state, sha224("my_static_key".encode("utf-8")).hexdigest())
 
-    def test_get_browser_state_uses_session_key_to_calculate_browser_state_if_available(self):
+    def test_get_browser_state_uses_session_key_to_calculate_browser_state_if_available(
+        self,
+    ):
         request = HttpRequest()
         request.session = mock.Mock(session_key="my_session_key")
         state = get_browser_state_or_default(request)

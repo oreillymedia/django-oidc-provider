@@ -35,15 +35,17 @@ class EndSessionTestCase(TestCase):
 
         # Create a valid ID Token for the user.
         token = create_token(self.user, self.oidc_client, [])
-        id_token_dic = create_id_token(token=token, user=self.user, aud=self.oidc_client.client_id)
+        id_token_dic = create_id_token(
+            token=token, user=self.user, aud=self.oidc_client.client_id
+        )
         self.id_token = encode_id_token(id_token_dic, self.oidc_client)
 
         self.url = reverse("oidc_provider:end-session")
         self.url_prompt = reverse("oidc_provider:end-session-prompt")
 
-    @override_settings(OIDC_LOGOUT_URL='/post-logout/')
+    @override_settings(OIDC_LOGOUT_URL="/post-logout/")
     def test_redirects_when_aud_is_str(self):
-        query_params = {'post_logout_redirect_uri': self.url_logout}
+        query_params = {"post_logout_redirect_uri": self.url_logout}
         response = self.client.get(self.url, query_params)
         # With no id_token the OP MUST NOT redirect to the requested
         # redirect_uri.
@@ -51,10 +53,11 @@ class EndSessionTestCase(TestCase):
 
         token = create_token(self.user, self.oidc_client, [])
         id_token_dic = create_id_token(
-            token=token, user=self.user, aud=self.oidc_client.client_id)
+            token=token, user=self.user, aud=self.oidc_client.client_id
+        )
         id_token = encode_id_token(id_token_dic, self.oidc_client)
 
-        query_params['id_token_hint'] = id_token
+        query_params["id_token_hint"] = id_token
 
         response = self.client.get(self.url, query_params)
         self.assertEqual(response.headers["Location"], self.url_logout)
@@ -110,7 +113,8 @@ class EndSessionTestCase(TestCase):
         # Let's ensure state is being passed to the logout url.
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
-            response.headers["Location"], "{0}?state={1}".format(self.url_logout, "ABCDE")
+            response.headers["Location"],
+            "{0}?state={1}".format(self.url_logout, "ABCDE"),
         )
 
     def test_post_logout_uri_not_in_client_urls(self):
@@ -127,7 +131,9 @@ class EndSessionTestCase(TestCase):
             "{0}?client_id={1}".format(self.url_prompt, self.oidc_client.client_id),
         )
 
-    def test_prompt_view_redirecting_to_client_post_logout_since_user_unauthenticated(self):
+    def test_prompt_view_redirecting_to_client_post_logout_since_user_unauthenticated(
+        self,
+    ):
         self.client.logout()
         query_params = {
             "client_id": self.oidc_client.client_id,
@@ -174,7 +180,9 @@ class EndSessionTestCase(TestCase):
         )
 
     @mock.patch("oidc_provider.views.after_end_session_hook")
-    def test_prompt_view_user_logged_out_after_form_allowed(self, after_end_session_hook):
+    def test_prompt_view_user_logged_out_after_form_allowed(
+        self, after_end_session_hook
+    ):
         self.assertIn("_auth_user_id", self.client.session)
         # We want to POST to /end-session-prompt/?client_id=ABC endpoint.
         url_prompt_with_client = (
@@ -199,7 +207,9 @@ class EndSessionTestCase(TestCase):
         self.assertTrue(after_end_session_hook.call_count == 1)
 
     @mock.patch("oidc_provider.views.after_end_session_hook")
-    def test_prompt_view_user_logged_out_after_form_not_allowed(self, after_end_session_hook):
+    def test_prompt_view_user_logged_out_after_form_not_allowed(
+        self, after_end_session_hook
+    ):
         self.assertIn("_auth_user_id", self.client.session)
         # We want to POST to /end-session-prompt/?client_id=ABC endpoint.
         url_prompt_with_client = (

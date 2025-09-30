@@ -80,12 +80,16 @@ class AuthorizeView(View):
                 if "login" in authorize.params["prompt"]:
                     if "none" in authorize.params["prompt"]:
                         raise AuthorizeError(
-                            authorize.params["redirect_uri"], "login_required", authorize.grant_type
+                            authorize.params["redirect_uri"],
+                            "login_required",
+                            authorize.grant_type,
                         )
                     else:
                         django_user_logout(request)
                         next_page = strip_prompt_login(request.get_full_path())
-                        return redirect_to_login(next_page, settings.get("OIDC_LOGIN_URL"))
+                        return redirect_to_login(
+                            next_page, settings.get("OIDC_LOGIN_URL")
+                        )
 
                 if "select_account" in authorize.params["prompt"]:
                     # TODO: see how we can support multiple accounts for the end-user.
@@ -103,7 +107,9 @@ class AuthorizeView(View):
 
                 if {"none", "consent"}.issubset(authorize.params["prompt"]):
                     raise AuthorizeError(
-                        authorize.params["redirect_uri"], "consent_required", authorize.grant_type
+                        authorize.params["redirect_uri"],
+                        "consent_required",
+                        authorize.grant_type,
                     )
 
                 if not authorize.client.require_consent and (
@@ -122,14 +128,18 @@ class AuthorizeView(View):
 
                 if "none" in authorize.params["prompt"]:
                     raise AuthorizeError(
-                        authorize.params["redirect_uri"], "consent_required", authorize.grant_type
+                        authorize.params["redirect_uri"],
+                        "consent_required",
+                        authorize.grant_type,
                     )
 
                 # Generate hidden inputs for the form.
                 context = {
                     "params": authorize.params,
                 }
-                hidden_inputs = render_to_string("oidc_provider/hidden_inputs.html", context)
+                hidden_inputs = render_to_string(
+                    "oidc_provider/hidden_inputs.html", context
+                )
 
                 # Remove `openid` from scope list
                 # since we don't need to print it.
@@ -147,13 +157,17 @@ class AuthorizeView(View):
             else:
                 if "none" in authorize.params["prompt"]:
                     raise AuthorizeError(
-                        authorize.params["redirect_uri"], "login_required", authorize.grant_type
+                        authorize.params["redirect_uri"],
+                        "login_required",
+                        authorize.grant_type,
                     )
                 if "login" in authorize.params["prompt"]:
                     next_page = strip_prompt_login(request.get_full_path())
                     return redirect_to_login(next_page, settings.get("OIDC_LOGIN_URL"))
 
-                return redirect_to_login(request.get_full_path(), settings.get("OIDC_LOGIN_URL"))
+                return redirect_to_login(
+                    request.get_full_path(), settings.get("OIDC_LOGIN_URL")
+                )
 
         except (ClientIdError, RedirectUriError) as error:
             context = {
@@ -164,7 +178,9 @@ class AuthorizeView(View):
             return render(request, OIDC_TEMPLATES["error"], context)
 
         except AuthorizeError as error:
-            uri = error.create_uri(authorize.params["redirect_uri"], authorize.params["state"])
+            uri = error.create_uri(
+                authorize.params["redirect_uri"], authorize.params["state"]
+            )
 
             return redirect(uri)
 
@@ -183,7 +199,9 @@ class AuthorizeView(View):
                 )
 
                 raise AuthorizeError(
-                    authorize.params["redirect_uri"], "access_denied", authorize.grant_type
+                    authorize.params["redirect_uri"],
+                    "access_denied",
+                    authorize.grant_type,
                 )
 
             signals.user_accept_consent.send(
@@ -201,7 +219,9 @@ class AuthorizeView(View):
             return redirect(uri)
 
         except AuthorizeError as error:
-            uri = error.create_uri(authorize.params["redirect_uri"], authorize.params["state"])
+            uri = error.create_uri(
+                authorize.params["redirect_uri"], authorize.params["state"]
+            )
 
             return redirect(uri)
 
@@ -284,7 +304,9 @@ class ProviderInfoView(View):
         dic["token_endpoint"] = site_url + reverse("oidc_provider:token")
         dic["userinfo_endpoint"] = site_url + reverse("oidc_provider:userinfo")
         dic["end_session_endpoint"] = site_url + reverse("oidc_provider:end-session")
-        dic["introspection_endpoint"] = site_url + reverse("oidc_provider:token-introspection")
+        dic["introspection_endpoint"] = site_url + reverse(
+            "oidc_provider:token-introspection"
+        )
 
         dic["response_types_supported"] = self.types_supported
 
@@ -295,13 +317,18 @@ class ProviderInfoView(View):
         # See: http://openid.net/specs/openid-connect-core-1_0.html#SubjectIDTypes
         dic["subject_types_supported"] = ["public"]
 
-        dic["token_endpoint_auth_methods_supported"] = ["client_secret_post", "client_secret_basic"]
+        dic["token_endpoint_auth_methods_supported"] = [
+            "client_secret_post",
+            "client_secret_basic",
+        ]
 
         if settings.get("OIDC_SESSION_MANAGEMENT_ENABLE"):
-            dic["check_session_iframe"] = site_url + reverse("oidc_provider:check-session-iframe")
+            dic["check_session_iframe"] = site_url + reverse(
+                "oidc_provider:check-session-iframe"
+            )
 
-        if settings.get('OIDC_SCOPES_SUPPORTED'):
-            dic['scopes_supported'] = settings.get('OIDC_SCOPES_SUPPORTED')
+        if settings.get("OIDC_SCOPES_SUPPORTED"):
+            dic["scopes_supported"] = settings.get("OIDC_SCOPES_SUPPORTED")
 
         return dic
 
@@ -321,7 +348,11 @@ class ProviderInfoView(View):
                 response_dict = cached_dict
             else:
                 response_dict = self._build_response_dict(request)
-                cache.set(cache_key, response_dict, settings.get("OIDC_DISCOVERY_CACHE_EXPIRE"))
+                cache.set(
+                    cache_key,
+                    response_dict,
+                    settings.get("OIDC_DISCOVERY_CACHE_EXPIRE"),
+                )
         else:
             response_dict = self._build_response_dict(request)
 
@@ -379,7 +410,9 @@ class EndSessionView(View):
 
     @method_decorator(csrf_exempt)
     def dispatch(self, request, *args, **kwargs):
-        self.id_token_hint = request.POST.get("id_token_hint") or request.GET.get("id_token_hint")
+        self.id_token_hint = request.POST.get("id_token_hint") or request.GET.get(
+            "id_token_hint"
+        )
         self.post_logout_redirect_uri = request.POST.get(
             "post_logout_redirect_uri"
         ) or request.GET.get("post_logout_redirect_uri")
@@ -392,7 +425,10 @@ class EndSessionView(View):
                 self.client = Client.objects.get(client_id=client_id)
 
                 if self.post_logout_redirect_uri:
-                    if self.post_logout_redirect_uri not in self.client.post_logout_redirect_uris:
+                    if (
+                        self.post_logout_redirect_uri
+                        not in self.client.post_logout_redirect_uris
+                    ):
                         return redirect(
                             reverse("oidc_provider:end-session-prompt")
                             + "?"
@@ -403,7 +439,9 @@ class EndSessionView(View):
                             )
                         )
                 elif self.client.post_logout_redirect_uris:
-                    self.post_logout_redirect_uri = self.client.post_logout_redirect_uris[0]
+                    self.post_logout_redirect_uri = (
+                        self.client.post_logout_redirect_uris[0]
+                    )
                 else:
                     self.logout_user(
                         request,
@@ -413,7 +451,9 @@ class EndSessionView(View):
                         self.client,
                     )
                     return render(
-                        request, "oidc_provider/end_session_completed.html", {"client": self.client}
+                        request,
+                        "oidc_provider/end_session_completed.html",
+                        {"client": self.client},
                     )
 
                 if self.state:
@@ -457,7 +497,9 @@ class EndSessionPromptView(TemplateView):
                 return redirect(self.client.post_logout_redirect_uris[0])
             else:
                 return render(
-                    request, "oidc_provider/end_session_completed.html", {"client": self.client}
+                    request,
+                    "oidc_provider/end_session_completed.html",
+                    {"client": self.client},
                 )
 
         return super(EndSessionPromptView, self).get(request, *args, **kwargs)
@@ -494,10 +536,16 @@ class EndSessionPromptView(TemplateView):
             return redirect(next_page)
         elif allowed:
             return render(
-                request, "oidc_provider/end_session_completed.html", {"client": self.client}
+                request,
+                "oidc_provider/end_session_completed.html",
+                {"client": self.client},
             )
         else:
-            return render(request, "oidc_provider/end_session_failed.html", {"client": self.client})
+            return render(
+                request,
+                "oidc_provider/end_session_failed.html",
+                {"client": self.client},
+            )
 
 
 class CheckSessionIframeView(View):
