@@ -5,7 +5,6 @@ except ImportError:
 
 
 class RedirectUriError(Exception):
-
     error = "Redirect URI Error"
     description = (
         "The request fails due to a missing, invalid, or mismatching"
@@ -14,7 +13,6 @@ class RedirectUriError(Exception):
 
 
 class ClientIdError(Exception):
-
     error = "Client ID Error"
     description = "The client identifier (client_id) is missing or invalid."
 
@@ -46,19 +44,17 @@ class TokenIntrospectionError(Exception):
 
 
 class AuthorizeError(Exception):
-
     _errors = {
         # Oauth2 errors.
         # https://tools.ietf.org/html/rfc6749#section-4.1.2.1
         "invalid_request": "The request is otherwise malformed",
         "unauthorized_client": "The client is not authorized to request an "
         "authorization code using this method",
-        "access_denied": "The resource owner or authorization server denied "
-        "the request",
+        "access_denied": "The resource owner or authorization server denied the request",
         "unsupported_response_type": "The authorization server does not "
         "support obtaining an authorization code "
         "using this method",
-        "invalid_scope": "The requested scope is invalid, unknown, or " "malformed",
+        "invalid_scope": "The requested scope is invalid, unknown, or malformed",
         "server_error": "The authorization server encountered an error",
         "temporarily_unavailable": "The authorization server is currently "
         "unable to handle the request due to a "
@@ -68,17 +64,14 @@ class AuthorizeError(Exception):
         # http://openid.net/specs/openid-connect-core-1_0.html#AuthError
         "interaction_required": "The Authorization Server requires End-User "
         "interaction of some form to proceed",
-        "login_required": "The Authorization Server requires End-User "
-        "authentication",
+        "login_required": "The Authorization Server requires End-User authentication",
         "account_selection_required": "The End-User is required to select a "
         "session at the Authorization Server",
-        "consent_required": "The Authorization Server requires End-User" "consent",
+        "consent_required": "The Authorization Server requires End-Userconsent",
         "invalid_request_uri": "The request_uri in the Authorization Request "
         "returns an error or contains invalid data",
-        "invalid_request_object": "The request parameter contains an invalid "
-        "Request Object",
-        "request_not_supported": "The provider does not support use of the "
-        "request parameter",
+        "invalid_request_object": "The request parameter contains an invalid Request Object",
+        "request_not_supported": "The provider does not support use of the request parameter",
         "request_uri_not_supported": "The provider does not support use of the "
         "request_uri parameter",
         "registration_not_supported": "The provider does not support use of "
@@ -158,8 +151,7 @@ class BearerTokenError(Exception):
             401,
         ),
         "insufficient_scope": (
-            "The request requires higher privileges than provided by "
-            "the access token",
+            "The request requires higher privileges than provided by the access token",
             403,
         ),
     }

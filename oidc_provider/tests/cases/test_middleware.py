@@ -1,7 +1,8 @@
-import mock
+from unittest.mock import patch
 
+from django.test import TestCase
+from django.test import override_settings
 from django.urls import re_path
-from django.test import TestCase, override_settings
 from django.views.generic import View
 
 
@@ -25,9 +26,8 @@ MW_CLASSES = (
     OIDC_SESSION_MANAGEMENT_ENABLE=True,
 )
 class MiddlewareTestCase(TestCase):
-
     def setUp(self):
-        patcher = mock.patch("oidc_provider.middleware.get_browser_state_or_default")
+        patcher = patch("oidc_provider.middleware.get_browser_state_or_default")
         self.mock_get_state = patcher.start()
 
     def test_session_management_middleware_sets_cookie_on_response(self):
@@ -35,15 +35,12 @@ class MiddlewareTestCase(TestCase):
 
         self.assertIn("op_browser_state", response.cookies)
         self.assertEqual(
-            response.cookies["op_browser_state"].value,
-            str(self.mock_get_state.return_value),
+            response.cookies["op_browser_state"].value, str(self.mock_get_state.return_value)
         )
         self.mock_get_state.assert_called_once_with(response.wsgi_request)
 
     @override_settings(OIDC_SESSION_MANAGEMENT_ENABLE=False)
-    def test_session_management_middleware_does_not_set_cookie_if_session_management_disabled(
-        self,
-    ):
+    def test_session_management_middleware_does_not_set_cookie_if_session_management_disabled(self):
         response = self.client.get("/test/")
 
         self.assertNotIn("op_browser_state", response.cookies)

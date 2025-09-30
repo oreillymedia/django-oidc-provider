@@ -1,20 +1,18 @@
 from __future__ import unicode_literals
 
 from django.test import TestCase
-
 from django.utils.translation import override as override_language
 from six import text_type
 
-from oidc_provider.lib.claims import ScopeClaims, StandardScopeClaims, STANDARD_CLAIMS
-from oidc_provider.tests.app.utils import (
-    create_fake_user,
-    create_fake_client,
-    create_fake_token,
-)
+from oidc_provider.lib.claims import STANDARD_CLAIMS
+from oidc_provider.lib.claims import ScopeClaims
+from oidc_provider.lib.claims import StandardScopeClaims
+from oidc_provider.tests.app.utils import create_fake_client
+from oidc_provider.tests.app.utils import create_fake_token
+from oidc_provider.tests.app.utils import create_fake_user
 
 
 class ClaimsTestCase(TestCase):
-
     def setUp(self):
         self.user = create_fake_user()
         self.scopes = ["openid", "address", "email", "phone", "profile", "foo"]
@@ -66,14 +64,11 @@ class ClaimsTestCase(TestCase):
 
     def test_locale(self):
         with override_language("fr"):
-            self.assertEqual(
-                text_type(StandardScopeClaims.info_profile[0]), "Profil de base"
-            )
+            self.assertEqual(text_type(StandardScopeClaims.info_profile[0]), "Profil de base")
 
     def test_scopeclaims_class_inheritance(self):
         # Generate example class that will be used for `OIDC_EXTRA_SCOPE_CLAIMS` setting.
         class CustomScopeClaims(ScopeClaims):
-
             info_foo = ("Title", "Description")
 
             def scope_foo(self):

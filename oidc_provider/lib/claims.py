@@ -4,7 +4,6 @@ from django.utils.translation import gettext_lazy as _
 
 from oidc_provider import settings
 
-
 STANDARD_CLAIMS = {
     "name": "",
     "given_name": "",
@@ -36,13 +35,10 @@ STANDARD_CLAIMS = {
 
 
 class ScopeClaims(object):
-
     def __init__(self, token):
         self.user = token.user
         claims = copy.deepcopy(STANDARD_CLAIMS)
-        self.userinfo = settings.get("OIDC_USERINFO", import_str=True)(
-            claims, self.user
-        )
+        self.userinfo = settings.get("OIDC_USERINFO", import_str=True)(claims, self.user)
         self.scopes = token.scope
         self.client = token.client
 
@@ -83,7 +79,6 @@ class ScopeClaims(object):
         """
         aux_dic = dic.copy()
         for key, value in iter(dic.items()):
-
             if value is None or value == "":
                 del aux_dic[key]
             elif type(value) is dict:
@@ -134,16 +129,13 @@ class StandardScopeClaims(ScopeClaims):
         dic = {
             "name": self.userinfo.get("name"),
             "given_name": (
-                self.userinfo.get("given_name")
-                or getattr(self.user, "first_name", None)
+                self.userinfo.get("given_name") or getattr(self.user, "first_name", None)
             ),
             "family_name": (
-                self.userinfo.get("family_name")
-                or getattr(self.user, "last_name", None)
+                self.userinfo.get("family_name") or getattr(self.user, "last_name", None)
             ),
             "middle_name": self.userinfo.get("middle_name"),
-            "nickname": self.userinfo.get("nickname")
-            or getattr(self.user, "username", None),
+            "nickname": self.userinfo.get("nickname") or getattr(self.user, "username", None),
             "preferred_username": self.userinfo.get("preferred_username"),
             "profile": self.userinfo.get("profile"),
             "picture": self.userinfo.get("picture"),
@@ -185,18 +177,14 @@ class StandardScopeClaims(ScopeClaims):
 
     info_address = (
         _("Address information"),
-        _(
-            "Access to your address. Includes country, locality, street and other information."
-        ),
+        _("Access to your address. Includes country, locality, street and other information."),
     )
 
     def scope_address(self):
         dic = {
             "address": {
                 "formatted": self.userinfo.get("address", {}).get("formatted"),
-                "street_address": self.userinfo.get("address", {}).get(
-                    "street_address"
-                ),
+                "street_address": self.userinfo.get("address", {}).get("street_address"),
                 "locality": self.userinfo.get("address", {}).get("locality"),
                 "region": self.userinfo.get("address", {}).get("region"),
                 "postal_code": self.userinfo.get("address", {}).get("postal_code"),

@@ -1,13 +1,14 @@
 import base64
 import binascii
-from hashlib import md5, sha256
 import json
+from hashlib import md5
+from hashlib import sha256
 
+from django.conf import settings
+from django.core.serializers.json import DjangoJSONEncoder
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.conf import settings
-
 
 CLIENT_TYPE_CHOICES = [
     ("confidential", "Confidential"),
@@ -55,7 +56,6 @@ class ResponseType(models.Model):
 
 
 class Client(models.Model):
-
     name = models.CharField(max_length=100, default="", verbose_name=_("Name"))
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -76,12 +76,8 @@ class Client(models.Model):
             " of their credentials. <b>Public</b> clients are incapable."
         ),
     )
-    client_id = models.CharField(
-        max_length=255, unique=True, verbose_name=_("Client ID")
-    )
-    client_secret = models.CharField(
-        max_length=255, blank=True, verbose_name=_("Client SECRET")
-    )
+    client_id = models.CharField(max_length=255, unique=True, verbose_name=_("Client ID"))
+    client_secret = models.CharField(max_length=255, blank=True, verbose_name=_("Client SECRET"))
     response_types = models.ManyToManyField(ResponseType)
     jwt_alg = models.CharField(
         max_length=10,
@@ -105,10 +101,7 @@ class Client(models.Model):
         max_length=255, blank=True, default="", verbose_name=_("Contact Email")
     )
     logo = models.FileField(
-        blank=True,
-        default="",
-        upload_to="oidc_provider/clients",
-        verbose_name=_("Logo Image"),
+        blank=True, default="", upload_to="oidc_provider/clients", verbose_name=_("Logo Image")
     )
     reuse_consent = models.BooleanField(
         default=True,
@@ -124,9 +117,7 @@ class Client(models.Model):
         help_text=_("If disabled, the Server will NEVER ask the user for consent."),
     )
     _redirect_uris = models.TextField(
-        default="",
-        verbose_name=_("Redirect URIs"),
-        help_text=_("Enter each URI on a new line."),
+        default="", verbose_name=_("Redirect URIs"), help_text=_("Enter each URI on a new line.")
     )
     _post_logout_redirect_uris = models.TextField(
         blank=True,
@@ -190,10 +181,7 @@ class Client(models.Model):
 
 
 class BaseCodeTokenModel(models.Model):
-
-    client = models.ForeignKey(
-        Client, verbose_name=_("Client"), on_delete=models.CASCADE
-    )
+    client = models.ForeignKey(Client, verbose_name=_("Client"), on_delete=models.CASCADE)
     expires_at = models.DateTimeField(verbose_name=_("Expiration Date"))
     _scope = models.TextField(default="", verbose_name=_("Scopes"))
 
@@ -216,20 +204,13 @@ class BaseCodeTokenModel(models.Model):
 
 
 class Code(BaseCodeTokenModel):
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_("User"), on_delete=models.CASCADE
     )
     code = models.CharField(max_length=255, unique=True, verbose_name=_("Code"))
-    nonce = models.CharField(
-        max_length=255, blank=True, default="", verbose_name=_("Nonce")
-    )
-    is_authentication = models.BooleanField(
-        default=False, verbose_name=_("Is Authentication?")
-    )
-    code_challenge = models.CharField(
-        max_length=255, null=True, verbose_name=_("Code Challenge")
-    )
+    nonce = models.CharField(max_length=255, blank=True, default="", verbose_name=_("Nonce"))
+    is_authentication = models.BooleanField(default=False, verbose_name=_("Is Authentication?"))
+    code_challenge = models.CharField(max_length=255, null=True, verbose_name=_("Code Challenge"))
     code_challenge_method = models.CharField(
         max_length=255, null=True, verbose_name=_("Code Challenge Method")
     )
@@ -243,19 +224,11 @@ class Code(BaseCodeTokenModel):
 
 
 class Token(BaseCodeTokenModel):
-
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        null=True,
-        verbose_name=_("User"),
-        on_delete=models.CASCADE,
+        settings.AUTH_USER_MODEL, null=True, verbose_name=_("User"), on_delete=models.CASCADE
     )
-    access_token = models.CharField(
-        max_length=255, unique=True, verbose_name=_("Access Token")
-    )
-    refresh_token = models.CharField(
-        max_length=255, unique=True, verbose_name=_("Refresh Token")
-    )
+    access_token = models.CharField(max_length=255, unique=True, verbose_name=_("Access Token"))
+    refresh_token = models.CharField(max_length=255, unique=True, verbose_name=_("Refresh Token"))
     _id_token = models.TextField(verbose_name=_("ID Token"))
 
     class Meta:
@@ -268,7 +241,7 @@ class Token(BaseCodeTokenModel):
 
     @id_token.setter
     def id_token(self, value):
-        self._id_token = json.dumps(value)
+        self._id_token = json.dumps(value, cls=DjangoJSONEncoder, skipkeys=True, default=str)
 
     def __str__(self):
         return "{0} - {1}".format(self.client, self.access_token)
@@ -276,9 +249,7 @@ class Token(BaseCodeTokenModel):
     @property
     def at_hash(self):
         # @@@ d-o-p only supports 256 bits (change this if that changes)
-        hashed_access_token = (
-            sha256(self.access_token.encode("ascii")).hexdigest().encode("ascii")
-        )
+        hashed_access_token = sha256(self.access_token.encode("ascii")).hexdigest().encode("ascii")
         return (
             base64.urlsafe_b64encode(
                 binascii.unhexlify(hashed_access_token[: len(hashed_access_token) // 2])
@@ -289,7 +260,6 @@ class Token(BaseCodeTokenModel):
 
 
 class UserConsent(BaseCodeTokenModel):
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, verbose_name=_("User"), on_delete=models.CASCADE
     )
@@ -300,10 +270,7 @@ class UserConsent(BaseCodeTokenModel):
 
 
 class RSAKey(models.Model):
-
-    key = models.TextField(
-        verbose_name=_("Key"), help_text=_("Paste your private RSA Key here.")
-    )
+    key = models.TextField(verbose_name=_("Key"), help_text=_("Paste your private RSA Key here."))
 
     class Meta:
         ordering = ["id"]
@@ -318,6 +285,4 @@ class RSAKey(models.Model):
 
     @property
     def kid(self):
-        return "{0}".format(
-            md5(self.key.encode("utf-8")).hexdigest() if self.key else ""
-        )
+        return "{0}".format(md5(self.key.encode("utf-8")).hexdigest() if self.key else "")

@@ -2,11 +2,13 @@ import logging
 
 from django.http import JsonResponse
 
+from oidc_provider import settings
 from oidc_provider.lib.errors import TokenIntrospectionError
 from oidc_provider.lib.utils.common import run_processing_hook
 from oidc_provider.lib.utils.oauth2 import extract_client_auth
-from oidc_provider.models import Token, Client
-from oidc_provider import settings
+from oidc_provider.lib.utils.sanitization import sanitize_client_id
+from oidc_provider.models import Client
+from oidc_provider.models import Token
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +16,6 @@ INTROSPECTION_SCOPE = "token_introspection"
 
 
 class TokenIntrospectionEndpoint(object):
-
     def __init__(self, request):
         self.request = request
         self.params = {}
@@ -27,7 +28,7 @@ class TokenIntrospectionEndpoint(object):
         # Introspection only supports POST requests
         self.params["token"] = self.request.POST.get("token")
         client_id, client_secret = extract_client_auth(self.request)
-        self.params["client_id"] = client_id
+        self.params["client_id"] = sanitize_client_id(client_id)
         self.params["client_secret"] = client_secret
 
     def validate_params(self):
@@ -40,9 +41,7 @@ class TokenIntrospectionEndpoint(object):
         try:
             self.token = Token.objects.get(access_token=self.params["token"])
         except Token.DoesNotExist:
-            logger.debug(
-                "[Introspection] Token does not exist: %s", self.params["token"]
-            )
+            logger.debug("[Introspection] Token does not exist: %s", self.params["token"])
             raise TokenIntrospectionError()
         if self.token.has_expired():
             logger.debug("[Introspection] Token is not valid: %s", self.params["token"])
@@ -50,13 +49,10 @@ class TokenIntrospectionEndpoint(object):
 
         try:
             self.client = Client.objects.get(
-                client_id=self.params["client_id"],
-                client_secret=self.params["client_secret"],
+                client_id=self.params["client_id"], client_secret=self.params["client_secret"]
             )
         except Client.DoesNotExist:
-            logger.debug(
-                "[Introspection] No valid client for id: %s", self.params["client_id"]
-            )
+            logger.debug("[Introspection] No valid client for id: %s", self.params["client_id"])
             raise TokenIntrospectionError()
         if INTROSPECTION_SCOPE not in self.client.scope:
             logger.debug(
@@ -70,16 +66,14 @@ class TokenIntrospectionEndpoint(object):
         if settings.get("OIDC_INTROSPECTION_VALIDATE_AUDIENCE_SCOPE"):
             if not self.token.id_token:
                 logger.debug(
-                    "[Introspection] Token not an authentication token: %s",
-                    self.params["token"],
+                    "[Introspection] Token not an authentication token: %s", self.params["token"]
                 )
                 raise TokenIntrospectionError()
 
             audience = self.token.id_token.get("aud")
             if not audience:
                 logger.debug(
-                    "[Introspection] No audience found for token: %s",
-                    self.params["token"],
+                    "[Introspection] No audience found for token: %s", self.params["token"]
                 )
                 raise TokenIntrospectionError()
 

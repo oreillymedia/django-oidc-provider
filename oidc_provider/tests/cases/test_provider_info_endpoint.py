@@ -1,20 +1,19 @@
-from mock import patch
+from unittest.mock import patch
 
 from django.core.cache import cache
+from django.test import RequestFactory
+from django.test import TestCase
+from django.test import override_settings
 
 try:
     from django.urls import reverse
 except ImportError:
     from django.core.urlresolvers import reverse
-from django.test import RequestFactory
-from django.test import TestCase, override_settings
-
 
 from oidc_provider.views import ProviderInfoView
 
 
 class ProviderInfoTestCase(TestCase):
-
     def setUp(self):
         self.factory = RequestFactory()
 

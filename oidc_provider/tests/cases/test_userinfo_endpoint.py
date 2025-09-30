@@ -1,5 +1,4 @@
 import json
-
 from datetime import timedelta
 
 try:
@@ -15,20 +14,15 @@ from django.test import RequestFactory
 from django.test import TestCase
 from django.utils import timezone
 
-from oidc_provider.lib.utils.token import (
-    create_id_token,
-    create_token,
-)
-from oidc_provider.tests.app.utils import (
-    create_fake_user,
-    create_fake_client,
-    FAKE_NONCE,
-)
+from oidc_provider.lib.utils.token import create_id_token
+from oidc_provider.lib.utils.token import create_token
+from oidc_provider.tests.app.utils import FAKE_NONCE
+from oidc_provider.tests.app.utils import create_fake_client
+from oidc_provider.tests.app.utils import create_fake_user
 from oidc_provider.views import userinfo
 
 
 class UserInfoTestCase(TestCase):
-
     def setUp(self):
         self.factory = RequestFactory()
         self.user = create_fake_user()
@@ -157,23 +151,15 @@ class UserInfoTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(bool(response.content), True)
-        self.assertIn(
-            "given_name", response_dic, msg='"given_name" claim should be in response.'
-        )
-        self.assertNotIn(
-            "profile", response_dic, msg='"profile" claim should not be in response.'
-        )
+        self.assertIn("given_name", response_dic, msg='"given_name" claim should be in response.')
+        self.assertNotIn("profile", response_dic, msg='"profile" claim should not be in response.')
 
         # Now adding `address` scope.
         token = self._create_token(extra_scope=["profile", "address"])
         response = self._post_request(token.access_token)
         response_dic = json.loads(response.content.decode("utf-8"))
 
+        self.assertIn("address", response_dic, msg='"address" claim should be in response.')
         self.assertIn(
-            "address", response_dic, msg='"address" claim should be in response.'
-        )
-        self.assertIn(
-            "country",
-            response_dic["address"],
-            msg='"country" claim should be in response.',
+            "country", response_dic["address"], msg='"country" claim should be in response.'
         )

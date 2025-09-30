@@ -3,13 +3,12 @@
 from __future__ import unicode_literals
 
 import datetime
-from datetime import timezone
 
-from django.db import migrations, models
+from django.db import migrations
+from django.db import models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("oidc_provider", "0006_unique_user_client"),
     ]
@@ -36,7 +35,7 @@ class Migration(migrations.Migration):
             field=models.DateField(
                 auto_now_add=True,
                 default=datetime.datetime(
-                    2016, 1, 11, 18, 44, 32, 192477, tzinfo=timezone.utc
+                    2016, 1, 11, 18, 44, 32, 192477, tzinfo=datetime.timezone.utc
                 ),
             ),
             preserve_default=False,
@@ -45,9 +44,7 @@ class Migration(migrations.Migration):
             model_name="client",
             name="_redirect_uris",
             field=models.TextField(
-                default=b"",
-                help_text="Enter each URI on a new line.",
-                verbose_name="Redirect URI",
+                default=b"", help_text="Enter each URI on a new line.", verbose_name="Redirect URI"
             ),
         ),
     ]

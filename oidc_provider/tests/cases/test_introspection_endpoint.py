@@ -1,34 +1,33 @@
-import time
 import random
-
-from mock import patch
+import time
+from unittest.mock import patch
 
 try:
     from urllib.parse import urlencode
 except ImportError:
     from urllib import urlencode
-from django.utils.encoding import force_str
+
 from django.core.management import call_command
-from django.test import TestCase, RequestFactory, override_settings
+from django.test import RequestFactory
+from django.test import TestCase
+from django.test import override_settings
 from django.utils import timezone
+from django.utils.encoding import force_str
 
 try:
     from django.urls import reverse
 except ImportError:
     from django.core.urlresolvers import reverse
 
-from oidc_provider.tests.app.utils import (
-    create_fake_user,
-    create_fake_client,
-    create_fake_token,
-    FAKE_RANDOM_STRING,
-)
 from oidc_provider.lib.utils.token import create_id_token
+from oidc_provider.tests.app.utils import FAKE_RANDOM_STRING
+from oidc_provider.tests.app.utils import create_fake_client
+from oidc_provider.tests.app.utils import create_fake_token
+from oidc_provider.tests.app.utils import create_fake_user
 from oidc_provider.views import TokenIntrospectionView
 
 
 class IntrospectionTestCase(TestCase):
-
     def setUp(self):
         call_command("creatersakey")
         self.factory = RequestFactory()
@@ -111,13 +110,11 @@ class IntrospectionTestCase(TestCase):
         self._assert_active(response)
 
     @override_settings(
-        OIDC_INTROSPECTION_PROCESSING_HOOK="oidc_provider.tests.app.utils.fake_introspection_processing_hook"
-    )  # NOQA
+        OIDC_INTROSPECTION_PROCESSING_HOOK="oidc_provider.tests.app.utils.fake_introspection_processing_hook"  # noqa
+    )
     def test_custom_introspection_hook_called_on_valid_request(self):
         response = self._make_request()
-        self._assert_active(
-            response, test_introspection_processing_hook=FAKE_RANDOM_STRING
-        )
+        self._assert_active(response, test_introspection_processing_hook=FAKE_RANDOM_STRING)
 
     @override_settings(OIDC_INTROSPECTION_VALIDATE_AUDIENCE_SCOPE=False)
     def test_disable_audience_validation(self):
