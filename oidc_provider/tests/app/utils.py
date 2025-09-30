@@ -179,8 +179,6 @@ def fake_introspection_processing_hook(response_dict, client, id_token):
 
 class TestAuthBackend:
     def authenticate(self, *args, **kwargs):
-        if django.VERSION[0] >= 2 or (
-            django.VERSION[0] == 1 and django.VERSION[1] >= 11
-        ):
+        if django.VERSION[0] >= 2 or (django.VERSION[0] == 1 and django.VERSION[1] >= 11):
             assert len(args) > 0 and args[0]
         return ModelBackend().authenticate(*args, **kwargs)

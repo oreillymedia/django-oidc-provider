@@ -147,9 +147,7 @@ class Client(models.Model):
 
     def response_type_descriptions(self):
         # return as a list, rather than a generator, so descriptions display correctly in admin
-        return [
-            response_type.description for response_type in self.response_types.all()
-        ]
+        return [response_type.description for response_type in self.response_types.all()]
 
     @property
     def redirect_uris(self):
