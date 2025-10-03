@@ -1,7 +1,6 @@
 import logging
 from datetime import datetime
 from datetime import timedelta
-from hashlib import md5
 from hashlib import sha256
 
 from oidc_provider.compat import get_attr_or_callable
@@ -19,7 +18,6 @@ except ImportError:
     from urllib.parse import urlunsplit
 
 from secrets import token_hex
-from uuid import uuid4
 
 from django.utils import dateformat
 from django.utils import timezone
@@ -32,9 +30,7 @@ from oidc_provider.lib.errors import RedirectUriError
 from oidc_provider.lib.utils.common import get_browser_state_or_default
 from oidc_provider.lib.utils.sanitization import sanitize_client_id
 from oidc_provider.lib.utils.token import create_code
-from oidc_provider.lib.utils.token import create_id_token
 from oidc_provider.lib.utils.token import create_token
-from oidc_provider.lib.utils.token import encode_id_token
 from oidc_provider.models import Client
 from oidc_provider.models import UserConsent
 
