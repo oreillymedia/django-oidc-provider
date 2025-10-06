@@ -11,6 +11,7 @@ from oidc_provider import settings
 from oidc_provider.lib.errors import TokenError
 from oidc_provider.lib.errors import UserAuthError
 from oidc_provider.lib.utils.oauth2 import extract_client_auth
+from oidc_provider.lib.utils.sanitization import sanitize_client_id
 from oidc_provider.lib.utils.token import create_token
 from oidc_provider.models import Client
 from oidc_provider.models import Code
@@ -27,12 +28,12 @@ class TokenEndpoint(object):
         self._extract_params()
 
     def _encode_id_token(self, *args):
-        return settings.import_hook('OIDC_IDTOKEN_ENCODE_HOOK')(*args)
+        return settings.import_hook("OIDC_IDTOKEN_ENCODE_HOOK")(*args)
 
     def _extract_params(self):
         client_id, client_secret = extract_client_auth(self.request)
 
-        self.params["client_id"] = client_id
+        self.params["client_id"] = sanitize_client_id(client_id)
         self.params["client_secret"] = client_secret
         self.params["redirect_uri"] = self.request.POST.get("redirect_uri", "")
         self.params["grant_type"] = self.request.POST.get("grant_type", "")
